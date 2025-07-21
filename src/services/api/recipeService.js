@@ -485,9 +485,9 @@ async extractFromUrl(url) {
     }).filter(inst => inst && inst.trim());
   }
 
-  parseIngredientText(text) {
+parseIngredientText(text) {
     // Simple ingredient parsing - can be enhanced
-    const amountMatch = text.match(/^(\d+(?:[\.\,]\d+)?)\s*(\w+)?\s+(.+)/);
+    const amountMatch = text.match(/^(\d+(?:[.,]\d+)?)\s*(\w+)?\s+(.+)/);
     
     if (amountMatch) {
       return {

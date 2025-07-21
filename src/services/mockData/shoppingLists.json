@@ -1,0 +1,31 @@
+{
+  "shoppingLists": [
+    {
+      "Id": 1,
+      "name": "Weekend Dinner Party",
+      "items": [
+        { "name": "Pizza dough", "amount": 2, "unit": "balls", "category": "pantry", "checked": false },
+        { "name": "San Marzano tomatoes", "amount": 800, "unit": "g", "category": "canned", "checked": true },
+        { "name": "Fresh mozzarella", "amount": 500, "unit": "g", "category": "dairy", "checked": false },
+        { "name": "Fresh basil", "amount": 1, "unit": "bunch", "category": "herbs", "checked": false },
+        { "name": "Chicken breast", "amount": 4, "unit": "large", "category": "meat", "checked": false },
+        { "name": "Heavy cream", "amount": 2, "unit": "cups", "category": "dairy", "checked": true },
+        { "name": "Parmesan cheese", "amount": 2, "unit": "cups", "category": "dairy", "checked": false }
+      ],
+      "createdDate": "2024-01-15T12:00:00Z"
+    },
+    {
+      "Id": 2,
+      "name": "Weekly Meal Prep",
+      "items": [
+        { "name": "Quinoa", "amount": 2, "unit": "cups", "category": "pantry", "checked": false },
+        { "name": "Cherry tomatoes", "amount": 4, "unit": "cups", "category": "produce", "checked": false },
+        { "name": "Cucumber", "amount": 2, "unit": "large", "category": "produce", "checked": true },
+        { "name": "Feta cheese", "amount": 300, "unit": "g", "category": "dairy", "checked": false },
+        { "name": "Olive oil", "amount": 1, "unit": "bottle", "category": "pantry", "checked": false },
+        { "name": "Lemons", "amount": 4, "unit": "pieces", "category": "produce", "checked": true }
+      ],
+      "createdDate": "2024-01-12T08:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "recipes": [
+    {
+      "Id": 1,
+      "title": "Classic Margherita Pizza",
+      "source": "Instagram",
+      "sourceUrl": "https://instagram.com/foodie_chef/post/123",
+      "imageUrl": "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&h=600&fit=crop",
+      "prepTime": 20,
+      "cookTime": 15,
+      "servings": 4,
+      "ingredients": [
+        { "name": "Pizza dough", "amount": 1, "unit": "ball", "category": "pantry" },
+        { "name": "San Marzano tomatoes", "amount": 400, "unit": "g", "category": "canned" },
+        { "name": "Fresh mozzarella", "amount": 250, "unit": "g", "category": "dairy" },
+        { "name": "Fresh basil", "amount": 20, "unit": "leaves", "category": "herbs" },
+        { "name": "Extra virgin olive oil", "amount": 3, "unit": "tbsp", "category": "pantry" },
+        { "name": "Sea salt", "amount": 1, "unit": "tsp", "category": "pantry" }
+      ],
+      "instructions": [
+        "Preheat your oven to 475°F (245°C) with a pizza stone or baking sheet inside.",
+        "Roll out the pizza dough on a floured surface to about 12 inches in diameter.",
+        "Crush the San Marzano tomatoes by hand and spread evenly over the dough, leaving a 1-inch border.",
+        "Tear the mozzarella into small pieces and distribute over the sauce.",
+        "Drizzle with olive oil and sprinkle with sea salt.",
+        "Transfer to the hot pizza stone and bake for 12-15 minutes until crust is golden.",
+        "Remove from oven and immediately top with fresh basil leaves.",
+        "Let cool for 2-3 minutes before slicing and serving."
+      ],
+      "tags": ["italian", "pizza", "vegetarian", "quick"],
+      "dateAdded": "2024-01-15T10:30:00Z",
+      "notes": "Best pizza dough recipe from my Italian grandmother. The key is using San Marzano tomatoes!"
+    },
+    {
+      "Id": 2,
+      "title": "Creamy Chicken Alfredo",
+      "source": "TikTok",
+      "sourceUrl": "https://tiktok.com/@cooking_queen/video/456",
+      "imageUrl": "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=800&h=600&fit=crop",
+      "prepTime": 15,
+      "cookTime": 25,
+      "servings": 6,
+      "ingredients": [
+        { "name": "Fettuccine pasta", "amount": 1, "unit": "lb", "category": "pantry" },
+        { "name": "Chicken breast", "amount": 2, "unit": "large", "category": "meat" },
+        { "name": "Heavy cream", "amount": 2, "unit": "cups", "category": "dairy" },
+        { "name": "Parmesan cheese", "amount": 1, "unit": "cup", "category": "dairy" },
+        { "name": "Butter", "amount": 4, "unit": "tbsp", "category": "dairy" },
+        { "name": "Garlic", "amount": 4, "unit": "cloves", "category": "produce" },
+        { "name": "Black pepper", "amount": 1, "unit": "tsp", "category": "pantry" },
+        { "name": "Salt", "amount": 1, "unit": "tsp", "category": "pantry" }
+      ],
+      "instructions": [
+        "Cook fettuccine pasta according to package directions until al dente. Reserve 1 cup pasta water.",
+        "Season chicken breasts with salt and pepper, then cook in a large skillet until golden brown and cooked through, about 6-7 minutes per side.",
+        "Remove chicken and let rest, then slice into strips.",
+        "In the same skillet, melt butter and sauté minced garlic for 1 minute until fragrant.",
+        "Pour in heavy cream and bring to a gentle simmer.",
+        "Gradually whisk in grated Parmesan cheese until smooth and creamy.",
+        "Add cooked pasta and chicken back to the skillet, tossing to coat.",
+        "Add pasta water as needed to achieve desired consistency.",
+        "Season with additional salt, pepper, and serve immediately with extra Parmesan."
+      ],
+      "tags": ["pasta", "chicken", "comfort-food", "creamy", "dinner"],
+      "dateAdded": "2024-01-12T14:45:00Z",
+      "notes": "Viral TikTok recipe! Make sure not to boil the cream or it will curdle."
+    },
+    {
+      "Id": 3,
+      "title": "Thai Green Curry",
+      "source": "YouTube",
+      "sourceUrl": "https://youtube.com/watch?v=abc123",
+      "imageUrl": "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=800&h=600&fit=crop",
+      "prepTime": 20,
+      "cookTime": 30,
+      "servings": 4,
+      "ingredients": [
+        { "name": "Green curry paste", "amount": 3, "unit": "tbsp", "category": "pantry" },
+        { "name": "Coconut milk", "amount": 400, "unit": "ml", "category": "canned" },
+        { "name": "Chicken thigh", "amount": 500, "unit": "g", "category": "meat" },
+        { "name": "Thai eggplant", "amount": 2, "unit": "medium", "category": "produce" },
+        { "name": "Green beans", "amount": 100, "unit": "g", "category": "produce" },
+        { "name": "Thai basil", "amount": 20, "unit": "leaves", "category": "herbs" },
+        { "name": "Fish sauce", "amount": 2, "unit": "tbsp", "category": "pantry" },
+        { "name": "Palm sugar", "amount": 1, "unit": "tbsp", "category": "pantry" },
+        { "name": "Lime juice", "amount": 1, "unit": "tbsp", "category": "produce" }
+      ],
+      "instructions": [
+        "Heat 2 tablespoons of thick coconut cream in a wok or large pan over medium heat.",
+        "Add green curry paste and fry for 2-3 minutes until fragrant.",
+        "Add sliced chicken and cook until just done, about 5 minutes.",
+        "Pour in remaining coconut milk and bring to a gentle simmer.",
+        "Add quartered Thai eggplant and green beans, cook for 5 minutes.",
+        "Season with fish sauce, palm sugar, and lime juice to taste.",
+        "Add Thai basil leaves and stir gently.",
+        "Serve immediately with jasmine rice."
+      ],
+      "tags": ["thai", "curry", "spicy", "coconut", "chicken", "asian"],
+      "dateAdded": "2024-01-08T16:20:00Z",
+      "notes": "Authentic recipe from a Thai cooking channel. Adjust spice level by using more or less curry paste."
+    },
+    {
+      "Id": 4,
+      "title": "Chocolate Chip Cookies",
+      "source": "Pinterest",
+      "sourceUrl": "https://pinterest.com/pin/789456123",
+      "imageUrl": "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=800&h=600&fit=crop",
+      "prepTime": 15,
+      "cookTime": 12,
+      "servings": 24,
+      "ingredients": [
+        { "name": "All-purpose flour", "amount": 2.25, "unit": "cups", "category": "pantry" },
+        { "name": "Butter", "amount": 1, "unit": "cup", "category": "dairy" },
+        { "name": "Brown sugar", "amount": 0.75, "unit": "cup", "category": "pantry" },
+        { "name": "White sugar", "amount": 0.75, "unit": "cup", "category": "pantry" },
+        { "name": "Eggs", "amount": 2, "unit": "large", "category": "dairy" },
+        { "name": "Vanilla extract", "amount": 2, "unit": "tsp", "category": "pantry" },
+        { "name": "Baking soda", "amount": 1, "unit": "tsp", "category": "pantry" },
+        { "name": "Salt", "amount": 1, "unit": "tsp", "category": "pantry" },
+        { "name": "Chocolate chips", "amount": 2, "unit": "cups", "category": "pantry" }
+      ],
+      "instructions": [
+        "Preheat oven to 375°F (190°C).",
+        "In a large bowl, cream together softened butter and both sugars until fluffy, about 3 minutes.",
+        "Beat in eggs one at a time, then add vanilla extract.",
+        "In a separate bowl, whisk together flour, baking soda, and salt.",
+        "Gradually mix dry ingredients into wet ingredients until just combined.",
+        "Fold in chocolate chips.",
+        "Drop rounded tablespoons of dough onto ungreased baking sheets, spacing 2 inches apart.",
+        "Bake for 9-11 minutes until golden brown around edges.",
+        "Cool on baking sheet for 5 minutes before transferring to wire rack."
+      ],
+      "tags": ["cookies", "dessert", "chocolate", "baking", "sweet"],
+      "dateAdded": "2024-01-05T11:15:00Z",
+      "notes": "The secret is to slightly underbake them for chewy centers! Popular Pinterest recipe with 50K saves."
+    },
+    {
+      "Id": 5,
+      "title": "Mediterranean Quinoa Salad",
+      "source": "Facebook",
+      "sourceUrl": "https://facebook.com/healthy-recipes/post/654",
+      "imageUrl": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop",
+      "prepTime": 20,
+      "cookTime": 15,
+      "servings": 6,
+      "ingredients": [
+        { "name": "Quinoa", "amount": 1, "unit": "cup", "category": "pantry" },
+        { "name": "Cherry tomatoes", "amount": 2, "unit": "cups", "category": "produce" },
+        { "name": "Cucumber", "amount": 1, "unit": "large", "category": "produce" },
+        { "name": "Red onion", "amount": 0.5, "unit": "medium", "category": "produce" },
+        { "name": "Kalamata olives", "amount": 0.5, "unit": "cup", "category": "pantry" },
+        { "name": "Feta cheese", "amount": 150, "unit": "g", "category": "dairy" },
+        { "name": "Fresh parsley", "amount": 0.5, "unit": "cup", "category": "herbs" },
+        { "name": "Lemon juice", "amount": 3, "unit": "tbsp", "category": "produce" },
+        { "name": "Olive oil", "amount": 4, "unit": "tbsp", "category": "pantry" },
+        { "name": "Oregano", "amount": 1, "unit": "tsp", "category": "herbs" }
+      ],
+      "instructions": [
+        "Rinse quinoa under cold water until water runs clear.",
+        "Cook quinoa in 2 cups of salted water, bring to boil, then simmer covered for 15 minutes.",
+        "Let quinoa cool completely after cooking.",
+        "Halve cherry tomatoes, dice cucumber, and finely chop red onion.",
+        "Crumble feta cheese and roughly chop parsley.",
+        "In a large bowl, combine cooled quinoa with all vegetables.",
+        "Whisk together lemon juice, olive oil, and oregano for dressing.",
+        "Pour dressing over salad and toss gently to combine.",
+        "Add feta cheese and parsley, toss once more.",
+        "Chill for at least 30 minutes before serving to allow flavors to meld."
+      ],
+      "tags": ["salad", "healthy", "mediterranean", "quinoa", "vegetarian", "lunch"],
+      "dateAdded": "2024-01-03T09:30:00Z",
+      "notes": "Perfect for meal prep! Stays fresh in fridge for up to 3 days. Great for summer picnics."
+    }
+  ]
+}

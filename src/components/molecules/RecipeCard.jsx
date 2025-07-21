@@ -30,52 +30,58 @@ const RecipeCard = ({ recipe }) => {
     return "text-gray-500";
   };
 
-  return (
+return (
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className="recipe-card cursor-pointer overflow-hidden"
       onClick={handleClick}
     >
-      <div className="relative h-48">
+      <div className="relative h-48 overflow-hidden rounded-t-12">
+        {/* Image loading indicator */}
+        <div className="absolute inset-0 bg-cream-100 animate-pulse" />
         <img
-          src={recipe.imageUrl}
-          alt={recipe.title}
+          src={recipe?.imageUrl || '/api/placeholder/400/320'}
+          alt={recipe?.title || 'Recipe image'}
           className="w-full h-full object-cover"
           loading="lazy"
+          onError={(e) => {
+            e.target.src = '/api/placeholder/400/320';
+            e.target.onerror = null; // Prevent infinite loop
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full p-2">
-          <ApperIcon 
-            name={getPlatformIcon(recipe.source)} 
-            size={16} 
-            className={getPlatformColor(recipe.source)}
-          />
+        <div className="absolute top-3 left-3">
+          <div className={`p-2 rounded-full ${getPlatformColor(recipe?.source || '')} bg-opacity-90 backdrop-blur-sm`}>
+            <ApperIcon 
+              name={getPlatformIcon(recipe?.source || '')} 
+              size={16} 
+              className="text-white"
+            />
+          </div>
         </div>
         <div className="absolute bottom-3 left-3 text-white">
           <h3 className="font-playfair font-semibold text-lg leading-tight line-clamp-2">
-            {recipe.title}
+            {recipe?.title || 'Untitled Recipe'}
           </h3>
         </div>
       </div>
       
-      <div className="p-6 space-y-4">
+<div className="p-6 space-y-4">
         <div className="flex items-center justify-between text-sm text-gray-600">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
               <ApperIcon name="Clock" size={16} />
-              <span>{recipe.prepTime + recipe.cookTime}min</span>
+              <span>{(recipe?.prepTime || 0) + (recipe?.cookTime || 0)}min</span>
             </div>
             <div className="flex items-center space-x-1">
               <ApperIcon name="Users" size={16} />
-              <span>{recipe.servings}</span>
+              <span>{recipe?.servings || 'N/A'}</span>
             </div>
           </div>
           <span className="text-xs text-terracotta-500 font-medium">
-            {recipe.source}
+            {recipe?.source || 'Unknown'}
           </span>
         </div>
-        
         {recipe.tags && recipe.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {recipe.tags.slice(0, 3).map((tag, index) => (

@@ -112,11 +112,11 @@ class RecipeService {
   simulateExtraction(url) {
     // Simulate different extractions based on platform
     if (url.includes("instagram.com")) {
-      return {
+return {
         title: "One-Pan Salmon Dinner",
         source: "Instagram",
         sourceUrl: url,
-        imageUrl: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&h=600&fit=crop",
+        imageUrl: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&h=600&fit=crop&auto=format",
         prepTime: 10,
         cookTime: 25,
         servings: 4,
@@ -140,11 +140,11 @@ class RecipeService {
         notes: "Extracted from Instagram food post"
       };
     } else if (url.includes("tiktok.com")) {
-      return {
+return {
         title: "Viral Baked Feta Pasta",
         source: "TikTok",
         sourceUrl: url,
-        imageUrl: "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=800&h=600&fit=crop",
+        imageUrl: "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=800&h=600&fit=crop&auto=format",
         prepTime: 5,
         cookTime: 35,
         servings: 4,
@@ -171,11 +171,11 @@ class RecipeService {
       };
     } else {
       // Generic extraction for other URLs
-      return {
+return {
         title: "Extracted Recipe",
         source: "Web",
         sourceUrl: url,
-        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop",
+        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&auto=format",
         prepTime: 15,
         cookTime: 30,
         servings: 4,

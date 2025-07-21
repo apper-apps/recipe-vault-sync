@@ -1,3 +1,5 @@
+import React from "react";
+import Error from "@/components/ui/Error";
 import recipesData from "@/services/mockData/recipes.json";
 
 const STORAGE_KEY = "recipeVault_recipes";
@@ -334,6 +336,51 @@ notes: "The famous TikTok recipe that went viral!"
           ],
           tags: ["mediterranean", "stuffed-peppers", "healthy", "quinoa", "turkey", "gluten-free"],
           notes: "Recipe extracted from Facebook Reel - a healthy Mediterranean twist on classic stuffed peppers"
+};
+      } else if (reelId === "1704332086866990") {
+        return {
+          title: "Mediterranean Grilled Vegetable Bowl",
+          source: "Facebook Reel",
+          sourceUrl: url,
+          imageUrl: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop&auto=format",
+          prepTime: 20,
+          cookTime: 25,
+          servings: 4,
+          ingredients: [
+            { name: "Zucchini", amount: 2, unit: "medium", category: "produce" },
+            { name: "Red bell pepper", amount: 1, unit: "large", category: "produce" },
+            { name: "Yellow bell pepper", amount: 1, unit: "large", category: "produce" },
+            { name: "Red onion", amount: 1, unit: "medium", category: "produce" },
+            { name: "Cherry tomatoes", amount: 1.5, unit: "cups", category: "produce" },
+            { name: "Eggplant", amount: 1, unit: "small", category: "produce" },
+            { name: "Extra virgin olive oil", amount: 4, unit: "tbsp", category: "pantry" },
+            { name: "Balsamic vinegar", amount: 2, unit: "tbsp", category: "pantry" },
+            { name: "Fresh basil", amount: 0.25, unit: "cup", category: "herbs" },
+            { name: "Fresh oregano", amount: 2, unit: "tbsp", category: "herbs" },
+            { name: "Garlic", amount: 3, unit: "cloves", category: "produce" },
+            { name: "Feta cheese", amount: 0.5, unit: "cup", category: "dairy" },
+            { name: "Pine nuts", amount: 0.25, unit: "cup", category: "pantry" },
+            { name: "Quinoa", amount: 1, unit: "cup", category: "pantry" },
+            { name: "Sea salt", amount: 1, unit: "tsp", category: "pantry" },
+            { name: "Black pepper", amount: 0.5, unit: "tsp", category: "pantry" },
+            { name: "Lemon", amount: 1, unit: "large", category: "produce" }
+          ],
+          instructions: [
+            "Cook quinoa according to package instructions and set aside to cool",
+            "Preheat grill or grill pan to medium-high heat",
+            "Cut zucchini into 1/2-inch thick rounds, slice bell peppers into strips",
+            "Cut red onion into thick wedges and eggplant into 1/2-inch rounds",
+            "In a large bowl, toss vegetables with 3 tbsp olive oil, salt, and pepper",
+            "Grill vegetables in batches: 4-5 minutes per side until tender and charred",
+            "Remove vegetables from grill and let cool slightly, then cut into bite-sized pieces",
+            "In a small bowl, whisk together remaining olive oil, balsamic vinegar, minced garlic, and lemon juice",
+            "Add chopped fresh basil and oregano to the dressing, season with salt and pepper",
+            "In serving bowls, layer quinoa, grilled vegetables, and cherry tomatoes",
+            "Drizzle with herb dressing and top with crumbled feta and toasted pine nuts",
+            "Garnish with additional fresh herbs and serve warm or at room temperature"
+          ],
+          tags: ["mediterranean", "grilled-vegetables", "healthy", "quinoa", "vegetarian", "bowl", "summer"],
+          notes: "Fresh Mediterranean bowl perfect for summer - recipe extracted from Facebook cooking reel featuring colorful grilled vegetables"
         };
       } else {
         // Generic Facebook extraction for other reel IDs
@@ -372,7 +419,7 @@ notes: "The famous TikTok recipe that went viral!"
             "Bake for 20-25 minutes until chicken reaches internal temperature of 165°F",
             "Garnish with sliced green onions and sesame seeds before serving"
           ],
-          tags: ["chicken", "asian", "honey-garlic", "crispy", "dinner", "viral"],
+tags: ["chicken", "asian", "honey-garlic", "crispy", "dinner", "viral"],
           notes: "Recipe extracted from cooking reel - ingredients parsed from video caption and cooking demonstration"
         };
       }

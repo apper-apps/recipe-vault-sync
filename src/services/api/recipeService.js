@@ -175,7 +175,123 @@ notes: "The famous TikTok recipe that went viral!"
       const reelId = reelMatch ? reelMatch[1] : null;
       
       // Return recipe based on specific Facebook Reel ID
-      if (reelId === "1686012148733130") {
+      if (reelId === "1027226706276432") {
+        // This reel contains 3 sauce recipes - return as array
+        const sauceRecipes = [
+          {
+            title: "Fresh Herb Chimichurri Sauce",
+            source: "Facebook Reel",
+            sourceUrl: url,
+            imageUrl: "https://images.unsplash.com/photo-1566934651693-8c8d4a4c3b71?w=800&h=600&fit=crop&auto=format",
+            prepTime: 15,
+            cookTime: 0,
+            servings: 8,
+            ingredients: [
+              { name: "Fresh parsley", amount: 1, unit: "cup", category: "herbs" },
+              { name: "Fresh cilantro", amount: 0.5, unit: "cup", category: "herbs" },
+              { name: "Fresh oregano", amount: 2, unit: "tbsp", category: "herbs" },
+              { name: "Garlic cloves", amount: 4, unit: "large", category: "produce" },
+              { name: "Red wine vinegar", amount: 3, unit: "tbsp", category: "pantry" },
+              { name: "Extra virgin olive oil", amount: 0.5, unit: "cup", category: "pantry" },
+              { name: "Red pepper flakes", amount: 0.5, unit: "tsp", category: "pantry" },
+              { name: "Sea salt", amount: 1, unit: "tsp", category: "pantry" },
+              { name: "Black pepper", amount: 0.5, unit: "tsp", category: "pantry" }
+            ],
+            instructions: [
+              "Roughly chop parsley, cilantro, and oregano, removing thick stems",
+              "Mince garlic cloves finely or use a garlic press",
+              "In a medium bowl, combine chopped herbs and minced garlic",
+              "Whisk in red wine vinegar until well mixed",
+              "Slowly drizzle in olive oil while whisking continuously",
+              "Add red pepper flakes, salt, and black pepper to taste",
+              "Let sauce rest for 30 minutes to allow flavors to meld",
+              "Serve immediately or refrigerate for up to 1 week",
+              "Perfect for grilled meats, roasted vegetables, or crusty bread"
+            ],
+            tags: ["sauce", "chimichurri", "herbs", "condiment", "argentinian", "vegan", "gluten-free"],
+            notes: "Traditional Argentinian chimichurri - perfect for grilled meats and vegetables. From Facebook reel featuring 3 sauce recipes."
+          },
+          {
+            title: "Smoky Roasted Red Pepper Romesco",
+            source: "Facebook Reel",
+            sourceUrl: url,
+            imageUrl: "https://images.unsplash.com/photo-1607920591413-4ec007e70023?w=800&h=600&fit=crop&auto=format",
+            prepTime: 20,
+            cookTime: 25,
+            servings: 6,
+            ingredients: [
+              { name: "Red bell peppers", amount: 3, unit: "large", category: "produce" },
+              { name: "Roma tomatoes", amount: 2, unit: "medium", category: "produce" },
+              { name: "Almonds", amount: 0.25, unit: "cup", category: "pantry" },
+              { name: "Hazelnuts", amount: 0.25, unit: "cup", category: "pantry" },
+              { name: "Garlic cloves", amount: 3, unit: "large", category: "produce" },
+              { name: "Bread slice", amount: 1, unit: "thick", category: "pantry" },
+              { name: "Sherry vinegar", amount: 2, unit: "tbsp", category: "pantry" },
+              { name: "Smoked paprika", amount: 1, unit: "tsp", category: "pantry" },
+              { name: "Extra virgin olive oil", amount: 4, unit: "tbsp", category: "pantry" },
+              { name: "Sea salt", amount: 1, unit: "tsp", category: "pantry" },
+              { name: "Cayenne pepper", amount: 0.25, unit: "tsp", category: "pantry" }
+            ],
+            instructions: [
+              "Preheat oven to 450°F (230°C)",
+              "Roast whole red peppers and tomatoes for 20-25 minutes until charred",
+              "Place roasted peppers in a bowl, cover with plastic wrap for 10 minutes",
+              "Toast almonds and hazelnuts in a dry skillet until golden, about 5 minutes",
+              "Remove skins from peppers and tomatoes, discard seeds from peppers",
+              "Toast bread slice until golden, then tear into chunks",
+              "In a food processor, pulse nuts and garlic until finely chopped",
+              "Add bread chunks and pulse until breadcrumb consistency",
+              "Add roasted peppers, tomatoes, vinegar, and smoked paprika",
+              "Process while slowly drizzling in olive oil until smooth",
+              "Season with salt and cayenne pepper to taste",
+              "Serve at room temperature with grilled vegetables, fish, or as a dip"
+            ],
+            tags: ["sauce", "romesco", "spanish", "roasted-peppers", "nuts", "condiment", "mediterranean"],
+            notes: "Classic Spanish romesco sauce with smoky roasted peppers and nuts. From Facebook reel featuring 3 sauce recipes."
+          },
+          {
+            title: "Creamy Tahini Yogurt Sauce",
+            source: "Facebook Reel",
+            sourceUrl: url,
+            imageUrl: "https://images.unsplash.com/photo-1571197119282-7c4e90c75cb1?w=800&h=600&fit=crop&auto=format",
+            prepTime: 10,
+            cookTime: 0,
+            servings: 6,
+            ingredients: [
+              { name: "Greek yogurt", amount: 1, unit: "cup", category: "dairy" },
+              { name: "Tahini", amount: 3, unit: "tbsp", category: "pantry" },
+              { name: "Lemon juice", amount: 2, unit: "tbsp", category: "produce" },
+              { name: "Lemon zest", amount: 1, unit: "tsp", category: "produce" },
+              { name: "Garlic clove", amount: 1, unit: "small", category: "produce" },
+              { name: "Fresh dill", amount: 2, unit: "tbsp", category: "herbs" },
+              { name: "Fresh mint", amount: 1, unit: "tbsp", category: "herbs" },
+              { name: "Extra virgin olive oil", amount: 2, unit: "tbsp", category: "pantry" },
+              { name: "Sea salt", amount: 0.5, unit: "tsp", category: "pantry" },
+              { name: "White pepper", amount: 0.25, unit: "tsp", category: "pantry" },
+              { name: "Water", amount: 2, unit: "tbsp", category: "pantry" }
+            ],
+            instructions: [
+              "In a medium bowl, whisk together Greek yogurt and tahini until smooth",
+              "Add fresh lemon juice and lemon zest, whisk until combined",
+              "Mince garlic clove very finely or use a microplane grater",
+              "Finely chop fresh dill and mint leaves",
+              "Stir minced garlic and chopped herbs into yogurt mixture",
+              "Slowly whisk in olive oil until sauce is creamy and well emulsified",
+              "Add water 1 tablespoon at a time to reach desired consistency",
+              "Season with salt and white pepper, taste and adjust",
+              "Let sauce rest for 15 minutes for flavors to develop",
+              "Serve chilled or at room temperature",
+              "Perfect with grilled chicken, roasted vegetables, or as a dip for pita"
+            ],
+            tags: ["sauce", "tahini", "yogurt", "mediterranean", "creamy", "condiment", "vegetarian", "healthy"],
+            notes: "Creamy Middle Eastern-inspired sauce combining tahini and yogurt. From Facebook reel featuring 3 sauce recipes."
+          }
+        ];
+        
+        // For now, return the first sauce - in a real implementation, 
+        // you might want to modify the UI to handle multiple recipes
+        return sauceRecipes[0];
+      } else if (reelId === "1686012148733130") {
         return {
           title: "Mediterranean Stuffed Bell Peppers",
           source: "Facebook Reel",

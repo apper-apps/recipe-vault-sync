@@ -69,12 +69,40 @@ class RecipeService {
     return true;
   }
 
-  async extractFromUrl(url) {
+async extractFromUrl(url) {
     await this.delay();
     
-    // Simulate recipe extraction based on URL
-    const extractedRecipe = this.simulateExtraction(url);
-    return extractedRecipe;
+    try {
+      // Fetch the webpage content
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+          'Accept-Encoding': 'gzip, deflate',
+          'Connection': 'keep-alive',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const html = await response.text();
+      
+      // Parse the HTML content
+      const extractedRecipe = this.parseRecipeFromHtml(html, url);
+      
+      if (!extractedRecipe || !extractedRecipe.title) {
+        throw new Error('Could not extract recipe from this URL');
+      }
+
+      return extractedRecipe;
+    } catch (error) {
+      console.error('Recipe extraction error:', error);
+      throw new Error(`Failed to extract recipe: ${error.message}`);
+    }
   }
 
   async extractFromImage(imageFile) {
@@ -111,342 +139,552 @@ class RecipeService {
     return extractedRecipe;
   }
 
-  simulateExtraction(url) {
-    // Simulate different extractions based on platform
-    if (url.includes("instagram.com")) {
-return {
-        title: "One-Pan Salmon Dinner",
-        source: "Instagram",
-        sourceUrl: url,
-        imageUrl: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&h=600&fit=crop&auto=format",
-        prepTime: 10,
-        cookTime: 25,
-        servings: 4,
-        ingredients: [
-          { name: "Salmon fillets", amount: 4, unit: "pieces", category: "meat" },
-          { name: "Asparagus", amount: 1, unit: "lb", category: "produce" },
-          { name: "Cherry tomatoes", amount: 1, unit: "cup", category: "produce" },
-          { name: "Olive oil", amount: 3, unit: "tbsp", category: "pantry" },
-          { name: "Lemon", amount: 1, unit: "piece", category: "produce" },
-          { name: "Garlic", amount: 3, unit: "cloves", category: "produce" }
-        ],
-        instructions: [
-          "Preheat oven to 400°F (200°C)",
-          "Place salmon fillets on a baking sheet",
-          "Add asparagus and cherry tomatoes around salmon",
-          "Drizzle everything with olive oil and minced garlic",
-          "Season with salt, pepper, and lemon juice",
-          "Bake for 12-15 minutes until salmon flakes easily"
-        ],
-        tags: ["salmon", "healthy", "one-pan", "quick", "dinner"],
-        notes: "Extracted from Instagram food post"
-      };
-    } else if (url.includes("tiktok.com")) {
-return {
-        title: "Viral Baked Feta Pasta",
-        source: "TikTok",
-        sourceUrl: url,
-        imageUrl: "https://images.unsplash.com/photo-1621996346565-e3dbc353d2e5?w=800&h=600&fit=crop&auto=format",
-        prepTime: 5,
-        cookTime: 35,
-        servings: 4,
-        ingredients: [
-          { name: "Block feta cheese", amount: 8, "unit": "oz", "category": "dairy" },
-          { name: "Cherry tomatoes", amount: 2, "unit": "cups", "category": "produce" },
-          { name: "Olive oil", amount: 4, "unit": "tbsp", "category": "pantry" },
-          { name: "Pasta", amount: 1, "unit": "lb", "category": "pantry" },
-          { name: "Garlic", amount: 4, "unit": "cloves", "category": "produce" },
-          { name: "Fresh basil", amount: 10, "unit": "leaves", "category": "herbs" }
-        ],
-        instructions: [
-          "Preheat oven to 400°F (200°C)",
-          "Place feta block in center of baking dish",
-          "Surround with cherry tomatoes",
-          "Drizzle everything with olive oil and season",
-          "Bake for 35 minutes until tomatoes burst",
-          "Meanwhile, cook pasta according to package directions",
-          "Mash feta and tomatoes, mix with drained pasta",
-          "Add minced garlic and fresh basil before serving"
-        ],
-        tags: ["viral", "pasta", "feta", "tomatoes", "easy", "vegetarian"],
-notes: "The famous TikTok recipe that went viral!"
-      };
-} else if (url.includes("facebook.com")) {
-      // Facebook reel/video extraction - parse specific reel ID
-      const reelMatch = url.match(/\/reel\/(\d+)/);
-      const reelId = reelMatch ? reelMatch[1] : null;
+  parseRecipeFromHtml(html, url) {
+    // Create a simple HTML parser using DOMParser (available in browsers)
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // Try to extract structured data first
+    let recipe = this.extractStructuredData(doc) || this.extractFromMeta(doc) || this.extractFromContent(doc, url);
+    
+    if (!recipe) {
+      // Fallback to platform-specific extraction
+      recipe = this.extractFromPlatform(html, url);
+    }
+
+    return recipe;
+  }
+
+  extractStructuredData(doc) {
+    try {
+      // Look for JSON-LD structured data
+      const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
       
-      // Return recipe based on specific Facebook Reel ID
-      if (reelId === "1027226706276432") {
-        // This reel contains 3 sauce recipes - return as array
-        const sauceRecipes = [
-          {
-            title: "Fresh Herb Chimichurri Sauce",
-            source: "Facebook Reel",
-            sourceUrl: url,
-            imageUrl: "https://images.unsplash.com/photo-1566934651693-8c8d4a4c3b71?w=800&h=600&fit=crop&auto=format",
-            prepTime: 15,
-            cookTime: 0,
-            servings: 8,
-            ingredients: [
-              { name: "Fresh parsley", amount: 1, unit: "cup", category: "herbs" },
-              { name: "Fresh cilantro", amount: 0.5, unit: "cup", category: "herbs" },
-              { name: "Fresh oregano", amount: 2, unit: "tbsp", category: "herbs" },
-              { name: "Garlic cloves", amount: 4, unit: "large", category: "produce" },
-              { name: "Red wine vinegar", amount: 3, unit: "tbsp", category: "pantry" },
-              { name: "Extra virgin olive oil", amount: 0.5, unit: "cup", category: "pantry" },
-              { name: "Red pepper flakes", amount: 0.5, unit: "tsp", category: "pantry" },
-              { name: "Sea salt", amount: 1, unit: "tsp", category: "pantry" },
-              { name: "Black pepper", amount: 0.5, unit: "tsp", category: "pantry" }
-            ],
-            instructions: [
-              "Roughly chop parsley, cilantro, and oregano, removing thick stems",
-              "Mince garlic cloves finely or use a garlic press",
-              "In a medium bowl, combine chopped herbs and minced garlic",
-              "Whisk in red wine vinegar until well mixed",
-              "Slowly drizzle in olive oil while whisking continuously",
-              "Add red pepper flakes, salt, and black pepper to taste",
-              "Let sauce rest for 30 minutes to allow flavors to meld",
-              "Serve immediately or refrigerate for up to 1 week",
-              "Perfect for grilled meats, roasted vegetables, or crusty bread"
-            ],
-            tags: ["sauce", "chimichurri", "herbs", "condiment", "argentinian", "vegan", "gluten-free"],
-            notes: "Traditional Argentinian chimichurri - perfect for grilled meats and vegetables. From Facebook reel featuring 3 sauce recipes."
-          },
-          {
-            title: "Smoky Roasted Red Pepper Romesco",
-            source: "Facebook Reel",
-            sourceUrl: url,
-            imageUrl: "https://images.unsplash.com/photo-1607920591413-4ec007e70023?w=800&h=600&fit=crop&auto=format",
-            prepTime: 20,
-            cookTime: 25,
-            servings: 6,
-            ingredients: [
-              { name: "Red bell peppers", amount: 3, unit: "large", category: "produce" },
-              { name: "Roma tomatoes", amount: 2, unit: "medium", category: "produce" },
-              { name: "Almonds", amount: 0.25, unit: "cup", category: "pantry" },
-              { name: "Hazelnuts", amount: 0.25, unit: "cup", category: "pantry" },
-              { name: "Garlic cloves", amount: 3, unit: "large", category: "produce" },
-              { name: "Bread slice", amount: 1, unit: "thick", category: "pantry" },
-              { name: "Sherry vinegar", amount: 2, unit: "tbsp", category: "pantry" },
-              { name: "Smoked paprika", amount: 1, unit: "tsp", category: "pantry" },
-              { name: "Extra virgin olive oil", amount: 4, unit: "tbsp", category: "pantry" },
-              { name: "Sea salt", amount: 1, unit: "tsp", category: "pantry" },
-              { name: "Cayenne pepper", amount: 0.25, unit: "tsp", category: "pantry" }
-            ],
-            instructions: [
-              "Preheat oven to 450°F (230°C)",
-              "Roast whole red peppers and tomatoes for 20-25 minutes until charred",
-              "Place roasted peppers in a bowl, cover with plastic wrap for 10 minutes",
-              "Toast almonds and hazelnuts in a dry skillet until golden, about 5 minutes",
-              "Remove skins from peppers and tomatoes, discard seeds from peppers",
-              "Toast bread slice until golden, then tear into chunks",
-              "In a food processor, pulse nuts and garlic until finely chopped",
-              "Add bread chunks and pulse until breadcrumb consistency",
-              "Add roasted peppers, tomatoes, vinegar, and smoked paprika",
-              "Process while slowly drizzling in olive oil until smooth",
-              "Season with salt and cayenne pepper to taste",
-              "Serve at room temperature with grilled vegetables, fish, or as a dip"
-            ],
-            tags: ["sauce", "romesco", "spanish", "roasted-peppers", "nuts", "condiment", "mediterranean"],
-            notes: "Classic Spanish romesco sauce with smoky roasted peppers and nuts. From Facebook reel featuring 3 sauce recipes."
-          },
-          {
-            title: "Creamy Tahini Yogurt Sauce",
-            source: "Facebook Reel",
-            sourceUrl: url,
-            imageUrl: "https://images.unsplash.com/photo-1571197119282-7c4e90c75cb1?w=800&h=600&fit=crop&auto=format",
-            prepTime: 10,
-            cookTime: 0,
-            servings: 6,
-            ingredients: [
-              { name: "Greek yogurt", amount: 1, unit: "cup", category: "dairy" },
-              { name: "Tahini", amount: 3, unit: "tbsp", category: "pantry" },
-              { name: "Lemon juice", amount: 2, unit: "tbsp", category: "produce" },
-              { name: "Lemon zest", amount: 1, unit: "tsp", category: "produce" },
-              { name: "Garlic clove", amount: 1, unit: "small", category: "produce" },
-              { name: "Fresh dill", amount: 2, unit: "tbsp", category: "herbs" },
-              { name: "Fresh mint", amount: 1, unit: "tbsp", category: "herbs" },
-              { name: "Extra virgin olive oil", amount: 2, unit: "tbsp", category: "pantry" },
-              { name: "Sea salt", amount: 0.5, unit: "tsp", category: "pantry" },
-              { name: "White pepper", amount: 0.25, unit: "tsp", category: "pantry" },
-              { name: "Water", amount: 2, unit: "tbsp", category: "pantry" }
-            ],
-            instructions: [
-              "In a medium bowl, whisk together Greek yogurt and tahini until smooth",
-              "Add fresh lemon juice and lemon zest, whisk until combined",
-              "Mince garlic clove very finely or use a microplane grater",
-              "Finely chop fresh dill and mint leaves",
-              "Stir minced garlic and chopped herbs into yogurt mixture",
-              "Slowly whisk in olive oil until sauce is creamy and well emulsified",
-              "Add water 1 tablespoon at a time to reach desired consistency",
-              "Season with salt and white pepper, taste and adjust",
-              "Let sauce rest for 15 minutes for flavors to develop",
-              "Serve chilled or at room temperature",
-              "Perfect with grilled chicken, roasted vegetables, or as a dip for pita"
-            ],
-            tags: ["sauce", "tahini", "yogurt", "mediterranean", "creamy", "condiment", "vegetarian", "healthy"],
-            notes: "Creamy Middle Eastern-inspired sauce combining tahini and yogurt. From Facebook reel featuring 3 sauce recipes."
+      for (const script of jsonLdScripts) {
+        try {
+          const data = JSON.parse(script.textContent);
+          const recipes = Array.isArray(data) ? data : [data];
+          
+          for (const item of recipes) {
+            if (item['@type'] === 'Recipe' || (item['@graph'] && item['@graph'].some(g => g['@type'] === 'Recipe'))) {
+              const recipeData = item['@type'] === 'Recipe' ? item : item['@graph'].find(g => g['@type'] === 'Recipe');
+              return this.parseStructuredRecipe(recipeData);
+            }
           }
-        ];
-        
-        // For now, return the first sauce - in a real implementation, 
-        // you might want to modify the UI to handle multiple recipes
-        return sauceRecipes[0];
-      } else if (reelId === "1686012148733130") {
-        return {
-          title: "Mediterranean Stuffed Bell Peppers",
-          source: "Facebook Reel",
-          sourceUrl: url,
-          imageUrl: "https://images.unsplash.com/photo-1594756202469-9ff9799b2e4e?w=800&h=600&fit=crop&auto=format",
-          prepTime: 20,
-          cookTime: 45,
-          servings: 6,
-          ingredients: [
-            { name: "Bell peppers", amount: 6, unit: "large", category: "produce" },
-            { name: "Ground turkey", amount: 1, unit: "lb", category: "meat" },
-            { name: "Quinoa", amount: 1, unit: "cup", category: "pantry" },
-            { name: "Diced tomatoes", amount: 1, unit: "can", category: "canned" },
-            { name: "Red onion", amount: 1, unit: "medium", category: "produce" },
-            { name: "Feta cheese", amount: 1, unit: "cup", category: "dairy" },
-            { name: "Kalamata olives", amount: 0.5, unit: "cup", category: "canned" },
-            { name: "Fresh parsley", amount: 0.25, unit: "cup", category: "herbs" },
-            { name: "Fresh mint", amount: 2, unit: "tbsp", category: "herbs" },
-            { name: "Olive oil", amount: 3, unit: "tbsp", category: "pantry" },
-            { name: "Lemon juice", amount: 2, unit: "tbsp", category: "produce" },
-            { name: "Garlic", amount: 3, unit: "cloves", category: "produce" },
-            { name: "Oregano", amount: 1, unit: "tsp", category: "pantry" },
-            { name: "Salt", amount: 1, unit: "tsp", category: "pantry" },
-            { name: "Black pepper", amount: 0.5, unit: "tsp", category: "pantry" }
-          ],
-          instructions: [
-            "Preheat oven to 375°F (190°C) and lightly oil a baking dish",
-            "Cut tops off bell peppers and remove seeds and membranes",
-            "Cook quinoa according to package instructions and set aside",
-            "Heat olive oil in a large skillet over medium heat",
-            "Sauté diced onion and minced garlic until softened, about 5 minutes",
-            "Add ground turkey and cook until browned, breaking up with a spoon",
-            "Stir in diced tomatoes, cooked quinoa, oregano, salt, and pepper",
-            "Remove from heat and fold in crumbled feta, chopped olives, parsley, and mint",
-            "Stuff each bell pepper with the quinoa mixture",
-            "Place stuffed peppers in baking dish and add 1/4 cup water to bottom",
-            "Cover with foil and bake for 35-40 minutes until peppers are tender",
-            "Remove foil and bake 5 more minutes until tops are lightly golden",
-            "Drizzle with lemon juice and garnish with fresh herbs before serving"
-          ],
-          tags: ["mediterranean", "stuffed-peppers", "healthy", "quinoa", "turkey", "gluten-free"],
-          notes: "Recipe extracted from Facebook Reel - a healthy Mediterranean twist on classic stuffed peppers"
-};
-      } else if (reelId === "1704332086866990") {
-        return {
-          title: "Mediterranean Grilled Vegetable Bowl",
-          source: "Facebook Reel",
-          sourceUrl: url,
-          imageUrl: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop&auto=format",
-          prepTime: 20,
-          cookTime: 25,
-          servings: 4,
-          ingredients: [
-            { name: "Zucchini", amount: 2, unit: "medium", category: "produce" },
-            { name: "Red bell pepper", amount: 1, unit: "large", category: "produce" },
-            { name: "Yellow bell pepper", amount: 1, unit: "large", category: "produce" },
-            { name: "Red onion", amount: 1, unit: "medium", category: "produce" },
-            { name: "Cherry tomatoes", amount: 1.5, unit: "cups", category: "produce" },
-            { name: "Eggplant", amount: 1, unit: "small", category: "produce" },
-            { name: "Extra virgin olive oil", amount: 4, unit: "tbsp", category: "pantry" },
-            { name: "Balsamic vinegar", amount: 2, unit: "tbsp", category: "pantry" },
-            { name: "Fresh basil", amount: 0.25, unit: "cup", category: "herbs" },
-            { name: "Fresh oregano", amount: 2, unit: "tbsp", category: "herbs" },
-            { name: "Garlic", amount: 3, unit: "cloves", category: "produce" },
-            { name: "Feta cheese", amount: 0.5, unit: "cup", category: "dairy" },
-            { name: "Pine nuts", amount: 0.25, unit: "cup", category: "pantry" },
-            { name: "Quinoa", amount: 1, unit: "cup", category: "pantry" },
-            { name: "Sea salt", amount: 1, unit: "tsp", category: "pantry" },
-            { name: "Black pepper", amount: 0.5, unit: "tsp", category: "pantry" },
-            { name: "Lemon", amount: 1, unit: "large", category: "produce" }
-          ],
-          instructions: [
-            "Cook quinoa according to package instructions and set aside to cool",
-            "Preheat grill or grill pan to medium-high heat",
-            "Cut zucchini into 1/2-inch thick rounds, slice bell peppers into strips",
-            "Cut red onion into thick wedges and eggplant into 1/2-inch rounds",
-            "In a large bowl, toss vegetables with 3 tbsp olive oil, salt, and pepper",
-            "Grill vegetables in batches: 4-5 minutes per side until tender and charred",
-            "Remove vegetables from grill and let cool slightly, then cut into bite-sized pieces",
-            "In a small bowl, whisk together remaining olive oil, balsamic vinegar, minced garlic, and lemon juice",
-            "Add chopped fresh basil and oregano to the dressing, season with salt and pepper",
-            "In serving bowls, layer quinoa, grilled vegetables, and cherry tomatoes",
-            "Drizzle with herb dressing and top with crumbled feta and toasted pine nuts",
-            "Garnish with additional fresh herbs and serve warm or at room temperature"
-          ],
-          tags: ["mediterranean", "grilled-vegetables", "healthy", "quinoa", "vegetarian", "bowl", "summer"],
-          notes: "Fresh Mediterranean bowl perfect for summer - recipe extracted from Facebook cooking reel featuring colorful grilled vegetables"
-        };
-      } else {
-        // Generic Facebook extraction for other reel IDs
-        return {
-          title: "Crispy Honey Garlic Chicken Thighs",
-          source: "Facebook Reel",
-          sourceUrl: url,
-          imageUrl: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800&h=600&fit=crop&auto=format",
-          prepTime: 15,
-          cookTime: 35,
-          servings: 4,
-          ingredients: [
-            { name: "Chicken thighs", amount: 8, unit: "pieces", category: "meat" },
-            { name: "Honey", amount: 4, unit: "tbsp", category: "pantry" },
-            { name: "Soy sauce", amount: 3, unit: "tbsp", category: "pantry" },
-            { name: "Garlic", amount: 6, unit: "cloves", category: "produce" },
-            { name: "Ginger", amount: 1, unit: "tbsp", category: "produce" },
-            { name: "Sesame oil", amount: 2, unit: "tsp", category: "pantry" },
-            { name: "Rice vinegar", amount: 2, unit: "tbsp", category: "pantry" },
-            { name: "Cornstarch", amount: 1, unit: "tbsp", category: "pantry" },
-            { name: "Green onions", amount: 3, unit: "stalks", category: "produce" },
-            { name: "Sesame seeds", amount: 1, unit: "tbsp", category: "pantry" },
-            { name: "Salt", amount: 1, unit: "tsp", category: "pantry" },
-            { name: "Black pepper", amount: 0.5, unit: "tsp", category: "pantry" },
-            { name: "Vegetable oil", amount: 2, unit: "tbsp", category: "pantry" }
-          ],
-          instructions: [
-            "Pat chicken thighs dry and season generously with salt and pepper",
-            "Heat vegetable oil in a large oven-safe skillet over medium-high heat",
-            "Place chicken thighs skin-side down and cook for 5-6 minutes until golden and crispy",
-            "Flip chicken and cook another 3-4 minutes, then remove to a plate",
-            "In the same pan, add minced garlic and ginger, cook for 30 seconds until fragrant",
-            "Whisk together honey, soy sauce, rice vinegar, sesame oil, and cornstarch",
-            "Pour sauce into the pan and bring to a simmer, stirring constantly",
-            "Return chicken to the pan, skin-side up, and transfer to 400°F oven",
-            "Bake for 20-25 minutes until chicken reaches internal temperature of 165°F",
-            "Garnish with sliced green onions and sesame seeds before serving"
-          ],
-tags: ["chicken", "asian", "honey-garlic", "crispy", "dinner", "viral"],
-          notes: "Recipe extracted from cooking reel - ingredients parsed from video caption and cooking demonstration"
-        };
+        } catch (e) {
+          continue;
+        }
       }
-    } else {
-      // Generic extraction for other URLs
+
+      // Look for microdata
+      const recipeElement = doc.querySelector('[itemtype*="Recipe"]');
+      if (recipeElement) {
+        return this.parseMicrodataRecipe(recipeElement);
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error parsing structured data:', error);
+      return null;
+    }
+  }
+
+  parseStructuredRecipe(data) {
+    const recipe = {
+      title: data.name || '',
+      source: this.extractSource(data.author),
+      sourceUrl: data.url || '',
+      imageUrl: this.extractImage(data.image),
+      prepTime: this.parseTime(data.prepTime),
+      cookTime: this.parseTime(data.cookTime),
+      servings: this.parseServings(data.recipeYield || data.yield),
+      ingredients: this.parseIngredients(data.recipeIngredient),
+      instructions: this.parseInstructions(data.recipeInstructions),
+      tags: this.parseTags(data.recipeCategory, data.recipeCuisine, data.keywords),
+      notes: data.description || ''
+    };
+
+    return recipe;
+  }
+
+  parseMicrodataRecipe(element) {
+    const getValue = (selector, prop = 'textContent') => {
+      const el = element.querySelector(selector);
+      return el ? el[prop] : '';
+    };
+
+    const getValues = (selector) => {
+      return Array.from(element.querySelectorAll(selector)).map(el => el.textContent.trim());
+    };
+
+    return {
+      title: getValue('[itemprop="name"]'),
+      source: getValue('[itemprop="author"]'),
+      sourceUrl: window.location.href,
+      imageUrl: getValue('[itemprop="image"]', 'src') || getValue('[itemprop="image"]', 'content'),
+      prepTime: this.parseTime(getValue('[itemprop="prepTime"]', 'content') || getValue('[itemprop="prepTime"]')),
+      cookTime: this.parseTime(getValue('[itemprop="cookTime"]', 'content') || getValue('[itemprop="cookTime"]')),
+      servings: this.parseServings(getValue('[itemprop="recipeYield"]')),
+      ingredients: this.parseIngredients(getValues('[itemprop="recipeIngredient"]')),
+      instructions: this.parseInstructions(getValues('[itemprop="recipeInstructions"]')),
+      tags: this.parseTags(getValue('[itemprop="recipeCategory"]')),
+      notes: getValue('[itemprop="description"]')
+    };
+  }
+
+  extractFromMeta(doc) {
+    const metaRecipe = {};
+    const metaTags = doc.querySelectorAll('meta');
+    
+    metaTags.forEach(meta => {
+      const property = meta.getAttribute('property') || meta.getAttribute('name');
+      const content = meta.getAttribute('content');
+      
+      if (property && content) {
+        if (property.includes('title') || property.includes('name')) metaRecipe.title = content;
+        if (property.includes('description')) metaRecipe.notes = content;
+        if (property.includes('image')) metaRecipe.imageUrl = content;
+        if (property.includes('author')) metaRecipe.source = content;
+      }
+    });
+
+    if (metaRecipe.title) {
       return {
-        title: "Extracted Recipe",
-        source: "Web",
-        sourceUrl: url,
-        imageUrl: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&auto=format",
-        prepTime: 15,
-        cookTime: 30,
+        title: metaRecipe.title,
+        source: metaRecipe.source || this.getSourceFromUrl(doc.location?.href),
+        sourceUrl: doc.location?.href || '',
+        imageUrl: metaRecipe.imageUrl || this.getDefaultImage(),
+        prepTime: 0,
+        cookTime: 0,
         servings: 4,
-        ingredients: [
-          { name: "Main ingredient", amount: 1, unit: "lb", category: "produce" },
-          { name: "Secondary ingredient", amount: 2, unit: "cups", category: "pantry" }
-        ],
-        instructions: [
-          "Prepare ingredients as specified",
-          "Follow cooking method from original recipe",
-          "Adjust seasoning to taste",
-          "Serve immediately"
-        ],
-        tags: ["extracted", "web"],
-        notes: "Recipe extracted from web URL"
+        ingredients: [],
+        instructions: [],
+        tags: [],
+        notes: metaRecipe.notes || 'Extracted from webpage metadata'
       };
     }
+
+    return null;
+  }
+
+  extractFromContent(doc, url) {
+    // Fallback content extraction
+    const title = this.extractTitle(doc);
+    const content = this.extractContentSections(doc);
+    
+    if (title) {
+      return {
+        title: title,
+        source: this.getSourceFromUrl(url),
+        sourceUrl: url,
+        imageUrl: this.extractImageFromContent(doc) || this.getDefaultImage(),
+        prepTime: 0,
+        cookTime: 0,
+        servings: 4,
+        ingredients: content.ingredients || [],
+        instructions: content.instructions || [],
+        tags: content.tags || [],
+        notes: `Extracted from ${this.getSourceFromUrl(url)} - content may require manual review`
+      };
+    }
+
+    return null;
+  }
+
+  extractFromPlatform(html, url) {
+    // Platform-specific extraction for social media and video platforms
+    if (url.includes('instagram.com')) {
+      return this.extractInstagramRecipe(html, url);
+    } else if (url.includes('tiktok.com')) {
+      return this.extractTikTokRecipe(html, url);
+    } else if (url.includes('facebook.com')) {
+      return this.extractFacebookRecipe(html, url);
+    } else if (url.includes('youtube.com')) {
+      return this.extractYouTubeRecipe(html, url);
+    } else if (url.includes('pinterest.com')) {
+      return this.extractPinterestRecipe(html, url);
+    }
+
+    return null;
+  }
+
+  extractInstagramRecipe(html, url) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    // Extract post content from Instagram
+    const title = this.extractTextContent(doc, ['h1', '[role="main"] div', 'article span']) || 'Instagram Recipe';
+    const description = this.extractTextContent(doc, ['meta[property="og:description"]'], 'content') || '';
+    
+    return {
+      title: title,
+      source: 'Instagram',
+      sourceUrl: url,
+      imageUrl: this.extractTextContent(doc, ['meta[property="og:image"]'], 'content') || this.getDefaultImage(),
+      prepTime: 15,
+      cookTime: 30,
+      servings: 4,
+      ingredients: this.parseIngredientsFromText(description),
+      instructions: this.parseInstructionsFromText(description),
+      tags: ['instagram', 'social-media'],
+      notes: `Recipe extracted from Instagram post: ${description.substring(0, 200)}...`
+    };
+  }
+
+  extractTikTokRecipe(html, url) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    const title = this.extractTextContent(doc, ['title', 'h1', '[data-e2e="video-desc"]']) || 'TikTok Recipe';
+    const description = this.extractTextContent(doc, ['meta[name="description"]', '[data-e2e="video-desc"]'], 'content') || '';
+    
+    return {
+      title: title,
+      source: 'TikTok',
+      sourceUrl: url,
+      imageUrl: this.extractTextContent(doc, ['meta[property="og:image"]'], 'content') || this.getDefaultImage(),
+      prepTime: 10,
+      cookTime: 20,
+      servings: 4,
+      ingredients: this.parseIngredientsFromText(description),
+      instructions: this.parseInstructionsFromText(description),
+      tags: ['tiktok', 'viral', 'quick'],
+      notes: `Recipe extracted from TikTok video: ${description.substring(0, 200)}...`
+    };
+  }
+
+  extractFacebookRecipe(html, url) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    const title = this.extractTextContent(doc, ['title', 'h1', '[data-testid="post_message"]']) || 'Facebook Recipe';
+    const description = this.extractTextContent(doc, ['meta[property="og:description"]', '[data-testid="post_message"]'], 'content') || '';
+    
+    return {
+      title: title,
+      source: 'Facebook',
+      sourceUrl: url,
+      imageUrl: this.extractTextContent(doc, ['meta[property="og:image"]'], 'content') || this.getDefaultImage(),
+      prepTime: 15,
+      cookTime: 30,
+      servings: 4,
+      ingredients: this.parseIngredientsFromText(description),
+      instructions: this.parseInstructionsFromText(description),
+      tags: ['facebook', 'social-media'],
+      notes: `Recipe extracted from Facebook post: ${description.substring(0, 200)}...`
+    };
+  }
+
+  extractYouTubeRecipe(html, url) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    const title = this.extractTextContent(doc, ['title', 'meta[property="og:title"]'], 'content') || 'YouTube Recipe';
+    const description = this.extractTextContent(doc, ['meta[name="description"]'], 'content') || '';
+    
+    return {
+      title: title.replace(' - YouTube', ''),
+      source: 'YouTube',
+      sourceUrl: url,
+      imageUrl: this.extractTextContent(doc, ['meta[property="og:image"]'], 'content') || this.getDefaultImage(),
+      prepTime: 20,
+      cookTime: 45,
+      servings: 4,
+      ingredients: this.parseIngredientsFromText(description),
+      instructions: this.parseInstructionsFromText(description),
+      tags: ['youtube', 'video'],
+      notes: `Recipe extracted from YouTube video: ${description.substring(0, 200)}...`
+    };
+  }
+
+  extractPinterestRecipe(html, url) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    
+    const title = this.extractTextContent(doc, ['title', 'meta[property="og:title"]'], 'content') || 'Pinterest Recipe';
+    const description = this.extractTextContent(doc, ['meta[property="og:description"]'], 'content') || '';
+    
+    return {
+      title: title,
+      source: 'Pinterest',
+      sourceUrl: url,
+      imageUrl: this.extractTextContent(doc, ['meta[property="og:image"]'], 'content') || this.getDefaultImage(),
+      prepTime: 15,
+      cookTime: 30,
+      servings: 4,
+      ingredients: this.parseIngredientsFromText(description),
+      instructions: this.parseInstructionsFromText(description),
+      tags: ['pinterest', 'pinned'],
+      notes: `Recipe extracted from Pinterest pin: ${description.substring(0, 200)}...`
+    };
+  }
+
+  // Helper methods for parsing
+  parseTime(timeStr) {
+    if (!timeStr) return 0;
+    
+    // Handle ISO 8601 duration (PT15M)
+    const iso8601Match = timeStr.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+    if (iso8601Match) {
+      const hours = parseInt(iso8601Match[1]) || 0;
+      const minutes = parseInt(iso8601Match[2]) || 0;
+      return hours * 60 + minutes;
+    }
+    
+    // Handle regular time formats
+    const timeMatch = timeStr.match(/(\d+)\s*(hour|hr|h|minute|min|m)/gi);
+    let totalMinutes = 0;
+    
+    if (timeMatch) {
+      timeMatch.forEach(match => {
+        const parts = match.match(/(\d+)\s*(hour|hr|h|minute|min|m)/i);
+        if (parts) {
+          const value = parseInt(parts[1]);
+          const unit = parts[2].toLowerCase();
+          if (unit.includes('h')) {
+            totalMinutes += value * 60;
+          } else {
+            totalMinutes += value;
+          }
+        }
+      });
+    }
+    
+    return totalMinutes || 0;
+  }
+
+  parseServings(servingsStr) {
+    if (!servingsStr) return 4;
+    const match = servingsStr.toString().match(/(\d+)/);
+    return match ? parseInt(match[1]) : 4;
+  }
+
+  parseIngredients(ingredientsList) {
+    if (!ingredientsList || !Array.isArray(ingredientsList)) return [];
+    
+    return ingredientsList.map((ingredient, index) => {
+      const text = typeof ingredient === 'string' ? ingredient : ingredient.text || '';
+      const parsed = this.parseIngredientText(text);
+      return {
+        name: parsed.name || text,
+        amount: parsed.amount || 1,
+        unit: parsed.unit || '',
+        category: this.categorizeIngredient(parsed.name || text)
+      };
+    }).filter(ing => ing.name);
+  }
+
+  parseInstructions(instructionsList) {
+    if (!instructionsList || !Array.isArray(instructionsList)) return [];
+    
+    return instructionsList.map(instruction => {
+      if (typeof instruction === 'string') return instruction;
+      if (instruction.text) return instruction.text;
+      if (instruction.name) return instruction.name;
+      return instruction.toString();
+    }).filter(inst => inst && inst.trim());
+  }
+
+  parseIngredientText(text) {
+    // Simple ingredient parsing - can be enhanced
+    const amountMatch = text.match(/^(\d+(?:[\.\,]\d+)?)\s*(\w+)?\s+(.+)/);
+    
+    if (amountMatch) {
+      return {
+        amount: parseFloat(amountMatch[1]),
+        unit: amountMatch[2] || '',
+        name: amountMatch[3]
+      };
+    }
+    
+    return { name: text };
+  }
+
+  categorizeIngredient(name) {
+    const categories = {
+      produce: ['tomato', 'onion', 'garlic', 'lemon', 'apple', 'carrot', 'pepper', 'lettuce', 'spinach'],
+      meat: ['chicken', 'beef', 'pork', 'fish', 'salmon', 'turkey', 'lamb'],
+      dairy: ['milk', 'cheese', 'butter', 'yogurt', 'cream', 'eggs'],
+      pantry: ['flour', 'sugar', 'salt', 'pepper', 'oil', 'vinegar', 'spice', 'rice', 'pasta'],
+      herbs: ['basil', 'oregano', 'thyme', 'parsley', 'cilantro', 'mint', 'rosemary'],
+      canned: ['tomatoes', 'beans', 'broth', 'stock', 'sauce'],
+      frozen: ['peas', 'corn', 'berries', 'vegetables']
+    };
+
+    const lowerName = name.toLowerCase();
+    for (const [category, keywords] of Object.entries(categories)) {
+      if (keywords.some(keyword => lowerName.includes(keyword))) {
+        return category;
+      }
+    }
+    
+    return 'pantry';
+  }
+
+  parseTags(category, cuisine, keywords) {
+    const tags = [];
+    
+    if (category) {
+      const cats = Array.isArray(category) ? category : [category];
+      tags.push(...cats.map(c => c.toLowerCase()));
+    }
+    
+    if (cuisine) {
+      const cuisines = Array.isArray(cuisine) ? cuisine : [cuisine];
+      tags.push(...cuisines.map(c => c.toLowerCase()));
+    }
+    
+    if (keywords) {
+      const keys = Array.isArray(keywords) ? keywords : keywords.split(',');
+      tags.push(...keys.map(k => k.trim().toLowerCase()));
+    }
+    
+    return [...new Set(tags)]; // Remove duplicates
+  }
+
+  extractSource(author) {
+    if (!author) return 'Web';
+    if (typeof author === 'string') return author;
+    if (author.name) return author.name;
+    if (Array.isArray(author) && author[0]) {
+      return typeof author[0] === 'string' ? author[0] : author[0].name;
+    }
+    return 'Web';
+  }
+
+  extractImage(imageData) {
+    if (!imageData) return this.getDefaultImage();
+    if (typeof imageData === 'string') return imageData;
+    if (imageData.url) return imageData.url;
+    if (Array.isArray(imageData) && imageData[0]) {
+      return typeof imageData[0] === 'string' ? imageData[0] : imageData[0].url;
+    }
+    return this.getDefaultImage();
+  }
+
+  getDefaultImage() {
+    return "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&auto=format";
+  }
+
+  getSourceFromUrl(url) {
+    try {
+      const domain = new URL(url).hostname.replace('www.', '');
+      return domain.charAt(0).toUpperCase() + domain.slice(1);
+    } catch {
+      return 'Web';
+    }
+  }
+
+  extractTitle(doc) {
+    const titleSelectors = ['h1', 'title', 'meta[property="og:title"]', 'meta[name="title"]'];
+    
+    for (const selector of titleSelectors) {
+      const element = doc.querySelector(selector);
+      if (element) {
+        const title = selector.startsWith('meta') ? 
+          element.getAttribute('content') : 
+          element.textContent;
+        
+        if (title && title.trim()) {
+          return title.trim();
+        }
+      }
+    }
+    
+    return null;
+  }
+
+  extractContentSections(doc) {
+    const ingredients = this.extractListContent(doc, ['ul', 'ol', '.ingredients', '.recipe-ingredients']);
+    const instructions = this.extractListContent(doc, ['ol', '.instructions', '.recipe-instructions', '.method']);
+    
+    return { ingredients, instructions, tags: [] };
+  }
+
+  extractListContent(doc, selectors) {
+    for (const selector of selectors) {
+      const element = doc.querySelector(selector);
+      if (element) {
+        const items = Array.from(element.querySelectorAll('li')).map(li => li.textContent.trim());
+        if (items.length > 0) return items;
+      }
+    }
+    return [];
+  }
+
+  extractImageFromContent(doc) {
+    const imgSelectors = ['img[alt*="recipe"]', 'img[class*="recipe"]', '.recipe-image img', 'img'];
+    
+    for (const selector of imgSelectors) {
+      const img = doc.querySelector(selector);
+      if (img && img.src) return img.src;
+    }
+    
+    return null;
+  }
+
+  extractTextContent(doc, selectors, attribute = 'textContent') {
+    for (const selector of selectors) {
+      const element = doc.querySelector(selector);
+      if (element) {
+        const content = attribute === 'content' ? 
+          element.getAttribute('content') : 
+          element[attribute];
+        
+        if (content && content.trim()) {
+          return content.trim();
+        }
+      }
+    }
+    return null;
+  }
+
+  parseIngredientsFromText(text) {
+    if (!text) return [];
+    
+    // Look for ingredient patterns in text
+    const ingredientPatterns = [
+      /ingredients?:?\s*([^\n]*(?:\n[^\n]*)*)/i,
+      /you['\s]*ll need:?\s*([^\n]*(?:\n[^\n]*)*)/i,
+    ];
+    
+    for (const pattern of ingredientPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        const lines = match[1].split(/[,\n]/).filter(line => line.trim());
+        return lines.map(line => ({
+          name: line.trim(),
+          amount: 1,
+          unit: '',
+          category: this.categorizeIngredient(line.trim())
+        }));
+      }
+    }
+    
+    return [];
+  }
+
+  parseInstructionsFromText(text) {
+    if (!text) return [];
+    
+    // Look for instruction patterns
+    const instructionPatterns = [
+      /instructions?:?\s*([^\n]*(?:\n[^\n]*)*)/i,
+      /method:?\s*([^\n]*(?:\n[^\n]*)*)/i,
+      /directions?:?\s*([^\n]*(?:\n[^\n]*)*)/i,
+    ];
+    
+    for (const pattern of instructionPatterns) {
+      const match = text.match(pattern);
+      if (match) {
+        const lines = match[1].split(/[.\n]/).filter(line => line.trim() && line.length > 10);
+        return lines.map(line => line.trim());
+      }
+    }
+    
+    // Fallback: split text into sentences that might be instructions
+    const sentences = text.split(/[.!]/).filter(s => s.trim().length > 20);
+    return sentences.length > 0 ? sentences.slice(0, 5).map(s => s.trim()) : [];
   }
 }
 

@@ -167,11 +167,51 @@ return {
           "Add minced garlic and fresh basil before serving"
         ],
         tags: ["viral", "pasta", "feta", "tomatoes", "easy", "vegetarian"],
-        notes: "The famous TikTok recipe that went viral!"
+notes: "The famous TikTok recipe that went viral!"
+      };
+    } else if (url.includes("facebook.com")) {
+      // Facebook reel/video extraction
+      return {
+        title: "Crispy Honey Garlic Chicken Thighs",
+        source: "Facebook Reel",
+        sourceUrl: url,
+        imageUrl: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800&h=600&fit=crop&auto=format",
+        prepTime: 15,
+        cookTime: 35,
+        servings: 4,
+        ingredients: [
+          { name: "Chicken thighs", amount: 8, unit: "pieces", category: "meat" },
+          { name: "Honey", amount: 4, unit: "tbsp", category: "pantry" },
+          { name: "Soy sauce", amount: 3, unit: "tbsp", category: "pantry" },
+          { name: "Garlic", amount: 6, unit: "cloves", category: "produce" },
+          { name: "Ginger", amount: 1, unit: "tbsp", category: "produce" },
+          { name: "Sesame oil", amount: 2, unit: "tsp", category: "pantry" },
+          { name: "Rice vinegar", amount: 2, unit: "tbsp", category: "pantry" },
+          { name: "Cornstarch", amount: 1, unit: "tbsp", category: "pantry" },
+          { name: "Green onions", amount: 3, unit: "stalks", category: "produce" },
+          { name: "Sesame seeds", amount: 1, unit: "tbsp", category: "pantry" },
+          { name: "Salt", amount: 1, unit: "tsp", category: "pantry" },
+          { name: "Black pepper", amount: 0.5, unit: "tsp", category: "pantry" },
+          { name: "Vegetable oil", amount: 2, unit: "tbsp", category: "pantry" }
+        ],
+        instructions: [
+          "Pat chicken thighs dry and season generously with salt and pepper",
+          "Heat vegetable oil in a large oven-safe skillet over medium-high heat",
+          "Place chicken thighs skin-side down and cook for 5-6 minutes until golden and crispy",
+          "Flip chicken and cook another 3-4 minutes, then remove to a plate",
+          "In the same pan, add minced garlic and ginger, cook for 30 seconds until fragrant",
+          "Whisk together honey, soy sauce, rice vinegar, sesame oil, and cornstarch",
+          "Pour sauce into the pan and bring to a simmer, stirring constantly",
+          "Return chicken to the pan, skin-side up, and transfer to 400°F oven",
+          "Bake for 20-25 minutes until chicken reaches internal temperature of 165°F",
+          "Garnish with sliced green onions and sesame seeds before serving"
+        ],
+        tags: ["chicken", "asian", "honey-garlic", "crispy", "dinner", "viral"],
+        notes: "Recipe extracted from cooking reel - ingredients parsed from video caption and cooking demonstration"
       };
     } else {
       // Generic extraction for other URLs
-return {
+      return {
         title: "Extracted Recipe",
         source: "Web",
         sourceUrl: url,

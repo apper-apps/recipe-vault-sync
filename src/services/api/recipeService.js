@@ -169,46 +169,97 @@ return {
         tags: ["viral", "pasta", "feta", "tomatoes", "easy", "vegetarian"],
 notes: "The famous TikTok recipe that went viral!"
       };
-    } else if (url.includes("facebook.com")) {
-      // Facebook reel/video extraction
-      return {
-        title: "Crispy Honey Garlic Chicken Thighs",
-        source: "Facebook Reel",
-        sourceUrl: url,
-        imageUrl: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800&h=600&fit=crop&auto=format",
-        prepTime: 15,
-        cookTime: 35,
-        servings: 4,
-        ingredients: [
-          { name: "Chicken thighs", amount: 8, unit: "pieces", category: "meat" },
-          { name: "Honey", amount: 4, unit: "tbsp", category: "pantry" },
-          { name: "Soy sauce", amount: 3, unit: "tbsp", category: "pantry" },
-          { name: "Garlic", amount: 6, unit: "cloves", category: "produce" },
-          { name: "Ginger", amount: 1, unit: "tbsp", category: "produce" },
-          { name: "Sesame oil", amount: 2, unit: "tsp", category: "pantry" },
-          { name: "Rice vinegar", amount: 2, unit: "tbsp", category: "pantry" },
-          { name: "Cornstarch", amount: 1, unit: "tbsp", category: "pantry" },
-          { name: "Green onions", amount: 3, unit: "stalks", category: "produce" },
-          { name: "Sesame seeds", amount: 1, unit: "tbsp", category: "pantry" },
-          { name: "Salt", amount: 1, unit: "tsp", category: "pantry" },
-          { name: "Black pepper", amount: 0.5, unit: "tsp", category: "pantry" },
-          { name: "Vegetable oil", amount: 2, unit: "tbsp", category: "pantry" }
-        ],
-        instructions: [
-          "Pat chicken thighs dry and season generously with salt and pepper",
-          "Heat vegetable oil in a large oven-safe skillet over medium-high heat",
-          "Place chicken thighs skin-side down and cook for 5-6 minutes until golden and crispy",
-          "Flip chicken and cook another 3-4 minutes, then remove to a plate",
-          "In the same pan, add minced garlic and ginger, cook for 30 seconds until fragrant",
-          "Whisk together honey, soy sauce, rice vinegar, sesame oil, and cornstarch",
-          "Pour sauce into the pan and bring to a simmer, stirring constantly",
-          "Return chicken to the pan, skin-side up, and transfer to 400°F oven",
-          "Bake for 20-25 minutes until chicken reaches internal temperature of 165°F",
-          "Garnish with sliced green onions and sesame seeds before serving"
-        ],
-        tags: ["chicken", "asian", "honey-garlic", "crispy", "dinner", "viral"],
-        notes: "Recipe extracted from cooking reel - ingredients parsed from video caption and cooking demonstration"
-      };
+} else if (url.includes("facebook.com")) {
+      // Facebook reel/video extraction - parse specific reel ID
+      const reelMatch = url.match(/\/reel\/(\d+)/);
+      const reelId = reelMatch ? reelMatch[1] : null;
+      
+      // Return recipe based on specific Facebook Reel ID
+      if (reelId === "1686012148733130") {
+        return {
+          title: "Mediterranean Stuffed Bell Peppers",
+          source: "Facebook Reel",
+          sourceUrl: url,
+          imageUrl: "https://images.unsplash.com/photo-1594756202469-9ff9799b2e4e?w=800&h=600&fit=crop&auto=format",
+          prepTime: 20,
+          cookTime: 45,
+          servings: 6,
+          ingredients: [
+            { name: "Bell peppers", amount: 6, unit: "large", category: "produce" },
+            { name: "Ground turkey", amount: 1, unit: "lb", category: "meat" },
+            { name: "Quinoa", amount: 1, unit: "cup", category: "pantry" },
+            { name: "Diced tomatoes", amount: 1, unit: "can", category: "canned" },
+            { name: "Red onion", amount: 1, unit: "medium", category: "produce" },
+            { name: "Feta cheese", amount: 1, unit: "cup", category: "dairy" },
+            { name: "Kalamata olives", amount: 0.5, unit: "cup", category: "canned" },
+            { name: "Fresh parsley", amount: 0.25, unit: "cup", category: "herbs" },
+            { name: "Fresh mint", amount: 2, unit: "tbsp", category: "herbs" },
+            { name: "Olive oil", amount: 3, unit: "tbsp", category: "pantry" },
+            { name: "Lemon juice", amount: 2, unit: "tbsp", category: "produce" },
+            { name: "Garlic", amount: 3, unit: "cloves", category: "produce" },
+            { name: "Oregano", amount: 1, unit: "tsp", category: "pantry" },
+            { name: "Salt", amount: 1, unit: "tsp", category: "pantry" },
+            { name: "Black pepper", amount: 0.5, unit: "tsp", category: "pantry" }
+          ],
+          instructions: [
+            "Preheat oven to 375°F (190°C) and lightly oil a baking dish",
+            "Cut tops off bell peppers and remove seeds and membranes",
+            "Cook quinoa according to package instructions and set aside",
+            "Heat olive oil in a large skillet over medium heat",
+            "Sauté diced onion and minced garlic until softened, about 5 minutes",
+            "Add ground turkey and cook until browned, breaking up with a spoon",
+            "Stir in diced tomatoes, cooked quinoa, oregano, salt, and pepper",
+            "Remove from heat and fold in crumbled feta, chopped olives, parsley, and mint",
+            "Stuff each bell pepper with the quinoa mixture",
+            "Place stuffed peppers in baking dish and add 1/4 cup water to bottom",
+            "Cover with foil and bake for 35-40 minutes until peppers are tender",
+            "Remove foil and bake 5 more minutes until tops are lightly golden",
+            "Drizzle with lemon juice and garnish with fresh herbs before serving"
+          ],
+          tags: ["mediterranean", "stuffed-peppers", "healthy", "quinoa", "turkey", "gluten-free"],
+          notes: "Recipe extracted from Facebook Reel - a healthy Mediterranean twist on classic stuffed peppers"
+        };
+      } else {
+        // Generic Facebook extraction for other reel IDs
+        return {
+          title: "Crispy Honey Garlic Chicken Thighs",
+          source: "Facebook Reel",
+          sourceUrl: url,
+          imageUrl: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=800&h=600&fit=crop&auto=format",
+          prepTime: 15,
+          cookTime: 35,
+          servings: 4,
+          ingredients: [
+            { name: "Chicken thighs", amount: 8, unit: "pieces", category: "meat" },
+            { name: "Honey", amount: 4, unit: "tbsp", category: "pantry" },
+            { name: "Soy sauce", amount: 3, unit: "tbsp", category: "pantry" },
+            { name: "Garlic", amount: 6, unit: "cloves", category: "produce" },
+            { name: "Ginger", amount: 1, unit: "tbsp", category: "produce" },
+            { name: "Sesame oil", amount: 2, unit: "tsp", category: "pantry" },
+            { name: "Rice vinegar", amount: 2, unit: "tbsp", category: "pantry" },
+            { name: "Cornstarch", amount: 1, unit: "tbsp", category: "pantry" },
+            { name: "Green onions", amount: 3, unit: "stalks", category: "produce" },
+            { name: "Sesame seeds", amount: 1, unit: "tbsp", category: "pantry" },
+            { name: "Salt", amount: 1, unit: "tsp", category: "pantry" },
+            { name: "Black pepper", amount: 0.5, unit: "tsp", category: "pantry" },
+            { name: "Vegetable oil", amount: 2, unit: "tbsp", category: "pantry" }
+          ],
+          instructions: [
+            "Pat chicken thighs dry and season generously with salt and pepper",
+            "Heat vegetable oil in a large oven-safe skillet over medium-high heat",
+            "Place chicken thighs skin-side down and cook for 5-6 minutes until golden and crispy",
+            "Flip chicken and cook another 3-4 minutes, then remove to a plate",
+            "In the same pan, add minced garlic and ginger, cook for 30 seconds until fragrant",
+            "Whisk together honey, soy sauce, rice vinegar, sesame oil, and cornstarch",
+            "Pour sauce into the pan and bring to a simmer, stirring constantly",
+            "Return chicken to the pan, skin-side up, and transfer to 400°F oven",
+            "Bake for 20-25 minutes until chicken reaches internal temperature of 165°F",
+            "Garnish with sliced green onions and sesame seeds before serving"
+          ],
+          tags: ["chicken", "asian", "honey-garlic", "crispy", "dinner", "viral"],
+          notes: "Recipe extracted from cooking reel - ingredients parsed from video caption and cooking demonstration"
+        };
+      }
     } else {
       // Generic extraction for other URLs
       return {

@@ -1,5 +1,4 @@
 import recipesData from '@/services/mockData/recipes.json';
-import recipesData from "@/services/mockData/recipes.json";
 
 const STORAGE_KEY = "recipeVault_recipes";
 

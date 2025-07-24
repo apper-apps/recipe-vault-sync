@@ -1,4 +1,6 @@
-import recipesData from '@/services/mockData/recipes.json';
+import React from "react";
+import recipesData from "@/services/mockData/recipes.json";
+import Error from "@/components/ui/Error";
 
 const STORAGE_KEY = "recipeVault_recipes";
 
@@ -702,6 +704,228 @@ parseIngredientText(text) {
     // Fallback: split text into sentences that might be instructions
     const sentences = text.split(/[.!]/).filter(s => s.trim().length > 20);
     return sentences.length > 0 ? sentences.slice(0, 5).map(s => s.trim()) : [];
+}
+
+  // Analysis method to determine optimal extraction approach
+  async analyzeExtractionMethod(input) {
+    await this.delay();
+    
+    try {
+      const analysis = {
+        inputType: this.detectInputType(input),
+        medium: this.detectMedium(input),
+        recommendedMethod: null,
+        confidence: 0,
+        challenges: [],
+        fallbackStrategies: []
+      };
+
+      // Determine recommended extraction method based on input analysis
+      analysis.recommendedMethod = this.getRecommendedMethod(analysis.inputType, analysis.medium, input);
+      analysis.confidence = this.calculateConfidence(analysis.inputType, analysis.medium, input);
+      analysis.challenges = this.identifyChallenges(analysis.inputType, analysis.medium, input);
+      analysis.fallbackStrategies = this.suggestFallbackStrategies(analysis.inputType, analysis.medium);
+
+      return analysis;
+    } catch (error) {
+      console.error('Extraction analysis error:', error);
+      throw new Error('Failed to analyze extraction method: ' + error.message);
+    }
+  }
+
+  detectInputType(input) {
+    if (typeof input !== 'string') return 'unknown';
+    
+    // URL detection
+    try {
+      new URL(input);
+      return 'url';
+    } catch {}
+
+    // Image file detection (would be handled differently in actual implementation)
+    if (input.match(/\.(jpg|jpeg|png|gif|webp|bmp)$/i)) {
+      return 'image';
+    }
+
+    // Video file detection
+    if (input.match(/\.(mp4|avi|mov|wmv|flv|webm)$/i)) {
+      return 'video';
+    }
+
+    // Text content detection
+    if (input.length > 50 && (
+      input.toLowerCase().includes('ingredient') ||
+      input.toLowerCase().includes('recipe') ||
+      input.toLowerCase().includes('cook') ||
+      input.toLowerCase().includes('bake')
+    )) {
+      return 'text';
+    }
+
+    return 'text'; // Default to text for short inputs
+  }
+
+  detectMedium(input) {
+    if (typeof input !== 'string') return 'unknown';
+
+    // Social media platform detection
+    if (input.includes('instagram.com')) return 'instagram';
+    if (input.includes('tiktok.com')) return 'tiktok';
+    if (input.includes('youtube.com') || input.includes('youtu.be')) return 'youtube';
+    if (input.includes('pinterest.com')) return 'pinterest';
+    if (input.includes('facebook.com')) return 'facebook';
+    if (input.includes('twitter.com') || input.includes('x.com')) return 'twitter';
+    if (input.includes('snapchat.com')) return 'snapchat';
+
+    // Recipe website detection
+    const recipeKeywords = ['recipe', 'cooking', 'food', 'kitchen', 'chef', 'bake', 'cuisine'];
+    if (recipeKeywords.some(keyword => input.toLowerCase().includes(keyword))) {
+      return 'recipe-website';
+    }
+
+    // Blog/article detection
+    if (input.includes('blog') || input.includes('article')) return 'blog';
+
+    // Video platform detection
+    if (input.includes('vimeo.com') || input.includes('dailymotion.com')) return 'video-platform';
+
+    // Default medium types
+    if (input.startsWith('http')) return 'website';
+    if (input.length > 200) return 'text-content';
+    
+    return 'text-snippet';
+  }
+
+  getRecommendedMethod(inputType, medium, input) {
+    const methodMap = {
+      'url': {
+        'instagram': 'social-media-extraction',
+        'tiktok': 'social-media-extraction', 
+        'youtube': 'video-content-extraction',
+        'pinterest': 'social-media-extraction',
+        'facebook': 'social-media-extraction',
+        'recipe-website': 'structured-data-extraction',
+        'website': 'content-scraping',
+        'blog': 'content-scraping'
+      },
+      'image': {
+        'default': 'ocr-extraction'
+      },
+      'video': {
+        'default': 'video-transcription-extraction'
+      },
+      'text': {
+        'text-content': 'text-parsing',
+        'text-snippet': 'pattern-matching'
+      }
+    };
+
+    const methodForMedium = methodMap[inputType]?.[medium] || methodMap[inputType]?.['default'];
+    return methodForMedium || 'content-scraping';
+  }
+
+  calculateConfidence(inputType, medium, input) {
+    let confidence = 50; // Base confidence
+
+    // Input type confidence boosts
+    if (inputType === 'url') {
+      confidence += 20;
+      
+      // Medium-specific confidence adjustments
+      if (['instagram', 'tiktok', 'youtube', 'pinterest', 'facebook'].includes(medium)) {
+        confidence += 15; // Well-supported social platforms
+      } else if (medium === 'recipe-website') {
+        confidence += 25; // Structured recipe sites are most reliable
+      }
+    } else if (inputType === 'image') {
+      confidence += 10; // OCR is moderately reliable
+    } else if (inputType === 'text') {
+      if (input.length > 500) confidence += 15; // More text = better parsing
+      if (input.toLowerCase().includes('ingredients') && input.toLowerCase().includes('instructions')) {
+        confidence += 20; // Clear recipe structure
+      }
+    }
+
+    // Content quality indicators
+    if (typeof input === 'string') {
+      if (input.includes('recipe')) confidence += 5;
+      if (input.includes('ingredients')) confidence += 5;
+      if (input.includes('instructions') || input.includes('directions')) confidence += 5;
+      if (input.match(/\d+\s*(cup|tbsp|tsp|oz|lb|kg|g|ml|l)/gi)) confidence += 10; // Measurements found
+    }
+
+    return Math.min(confidence, 95); // Cap at 95% to indicate uncertainty
+  }
+
+  identifyChallenges(inputType, medium, input) {
+    const challenges = [];
+
+    if (inputType === 'url') {
+      if (['instagram', 'tiktok', 'facebook'].includes(medium)) {
+        challenges.push('Social media content may be behind login walls');
+        challenges.push('Dynamic content loading may affect extraction');
+      }
+      if (medium === 'youtube') {
+        challenges.push('Video content requires transcript extraction');
+        challenges.push('Recipe may be scattered throughout video timeline');
+      }
+      challenges.push('Website structure changes may break extraction');
+      challenges.push('CORS policies may prevent direct access');
+    }
+
+    if (inputType === 'image') {
+      challenges.push('Handwriting recognition accuracy varies');
+      challenges.push('Image quality affects text extraction');
+      challenges.push('Complex layouts may confuse OCR');
+    }
+
+    if (inputType === 'text') {
+      challenges.push('Unstructured text requires pattern matching');
+      challenges.push('Measurement parsing may be inconsistent');
+      challenges.push('Instructions may lack clear separation');
+    }
+
+    if (inputType === 'video') {
+      challenges.push('Audio quality affects transcription accuracy');
+      challenges.push('Multiple speakers may complicate extraction');
+      challenges.push('Visual cues not captured in transcription');
+    }
+
+    return challenges;
+  }
+
+  suggestFallbackStrategies(inputType, medium) {
+    const strategies = [];
+
+    if (inputType === 'url') {
+      strategies.push('Try copying recipe text manually if extraction fails');
+      strategies.push('Check for embedded recipe cards or structured data');
+      strategies.push('Look for print-friendly version of the page');
+      
+      if (['instagram', 'tiktok', 'facebook'].includes(medium)) {
+        strategies.push('Screenshot the post and use image extraction');
+        strategies.push('Copy caption text for manual parsing');
+      }
+    }
+
+    if (inputType === 'image') {
+      strategies.push('Ensure good lighting and clear text visibility');
+      strategies.push('Try cropping to focus on recipe content only');
+      strategies.push('Consider manual entry for complex handwriting');
+    }
+
+    if (inputType === 'text') {
+      strategies.push('Break down into clear sections (ingredients, instructions)');
+      strategies.push('Use consistent formatting for better parsing');
+    }
+
+    if (inputType === 'video') {
+      strategies.push('Use video platform auto-generated captions');
+      strategies.push('Extract recipe from video description if available');
+      strategies.push('Take screenshots of recipe steps shown in video');
+    }
+
+    return strategies;
   }
 }
 

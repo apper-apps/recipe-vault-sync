@@ -10,7 +10,8 @@ import recipeService from "@/services/api/recipeService";
 const AddRecipeForm = ({ onRecipeAdded }) => {
   const [activeTab, setActiveTab] = useState("url");
   const [loading, setLoading] = useState(false);
-  const [extractedRecipe, setExtractedRecipe] = useState(null);
+const [extractedRecipe, setExtractedRecipe] = useState(null);
+  const [extractionAnalysis, setExtractionAnalysis] = useState(null);
   
   // URL extraction state
   const [url, setUrl] = useState("");
@@ -34,6 +35,25 @@ const AddRecipeForm = ({ onRecipeAdded }) => {
     if (url.includes("pinterest.com")) return { name: "Pinterest", icon: "Pin", color: "text-red-600" };
     if (url.includes("facebook.com")) return { name: "Facebook", icon: "Facebook", color: "text-blue-600" };
     return { name: "Web", icon: "Globe", color: "text-gray-500" };
+};
+
+  const handleAnalyzeExtraction = async () => {
+    if (!url.trim()) {
+      toast.error("Please enter a URL");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const analysis = await recipeService.analyzeExtractionMethod(url);
+      setExtractionAnalysis(analysis);
+      toast.success("Extraction method analyzed!");
+    } catch (error) {
+      toast.error("Failed to analyze extraction method");
+      console.error('Analysis error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUrlExtraction = async () => {
@@ -46,6 +66,7 @@ const AddRecipeForm = ({ onRecipeAdded }) => {
     try {
       const extracted = await recipeService.extractFromUrl(url);
       setExtractedRecipe(extracted);
+      setExtractionAnalysis(null); // Clear analysis after successful extraction
       toast.success("Recipe extracted successfully!");
     } catch (error) {
       toast.error("Failed to extract recipe from URL");
@@ -238,26 +259,139 @@ const AddRecipeForm = ({ onRecipeAdded }) => {
                       />
                     </div>
                   )}
-                </div>
+</div>
 
-                <Button
-                  onClick={handleUrlExtraction}
-                  disabled={loading || !url.trim()}
-                  className="w-full"
-                >
-                  {loading ? (
-                    <>
-                      <ApperIcon name="Loader2" size={18} className="animate-spin" />
-                      <span>Extracting Recipe...</span>
-                    </>
-                  ) : (
-                    <>
-                      <ApperIcon name="Download" size={18} />
-                      <span>Extract Recipe</span>
-                    </>
-                  )}
-                </Button>
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={handleAnalyzeExtraction}
+                    disabled={loading || !url.trim()}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    {loading && !extractionAnalysis ? (
+                      <>
+                        <ApperIcon name="Loader2" size={18} className="animate-spin" />
+                        <span>Analyzing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ApperIcon name="Search" size={18} />
+                        <span>Analyze Method</span>
+                      </>
+                    )}
+                  </Button>
+                  
+                  <Button
+                    onClick={handleUrlExtraction}
+                    disabled={loading || !url.trim()}
+                    className="flex-1"
+                  >
+                    {loading && extractionAnalysis ? (
+                      <>
+                        <ApperIcon name="Loader2" size={18} className="animate-spin" />
+                        <span>Extracting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ApperIcon name="Download" size={18} />
+                        <span>Extract Recipe</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
+
+              {/* Extraction Analysis Results */}
+              {extractionAnalysis && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-12 p-6 border border-blue-200"
+                >
+                  <div className="flex items-center space-x-2 mb-4">
+                    <ApperIcon name="Zap" size={20} className="text-blue-600" />
+                    <h4 className="font-semibold text-blue-900">Extraction Analysis</h4>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-600">Input Type:</span>
+                        <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                          {extractionAnalysis.inputType}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-600">Medium:</span>
+                        <span className="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+                          {extractionAnalysis.medium}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-600">Recommended Method:</span>
+                        <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                          {extractionAnalysis.recommendedMethod?.replace(/-/g, ' ')}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-600">Confidence:</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full ${
+                                extractionAnalysis.confidence >= 70 ? 'bg-green-500' :
+                                extractionAnalysis.confidence >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}
+                              style={{ width: `${extractionAnalysis.confidence}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm font-medium">{extractionAnalysis.confidence}%</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {extractionAnalysis.challenges.length > 0 && (
+                        <div>
+                          <h5 className="text-sm font-medium text-gray-600 mb-2">Potential Challenges:</h5>
+                          <ul className="text-xs text-gray-600 space-y-1">
+                            {extractionAnalysis.challenges.slice(0, 2).map((challenge, index) => (
+                              <li key={index} className="flex items-start space-x-1">
+                                <ApperIcon name="AlertTriangle" size={12} className="text-yellow-500 mt-0.5 flex-shrink-0" />
+                                <span>{challenge}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {extractionAnalysis.fallbackStrategies.length > 0 && (
+                        <div>
+                          <h5 className="text-sm font-medium text-gray-600 mb-2">Fallback Options:</h5>
+                          <ul className="text-xs text-gray-600 space-y-1">
+                            {extractionAnalysis.fallbackStrategies.slice(0, 2).map((strategy, index) => (
+                              <li key={index} className="flex items-start space-x-1">
+                                <ApperIcon name="Lightbulb" size={12} className="text-blue-500 mt-0.5 flex-shrink-0" />
+                                <span>{strategy}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-blue-200">
+                    <p className="text-xs text-blue-700">
+                      <ApperIcon name="Info" size={12} className="inline mr-1" />
+                      This analysis helps determine the best extraction approach for your recipe source.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
 
               {/* Platform Support Info */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-6 border-t border-cream-200">
@@ -512,7 +646,7 @@ const AddRecipeForm = ({ onRecipeAdded }) => {
                 <span>Save Recipe</span>
               </Button>
             </form>
-          )}
+)}
         </div>
       </div>
 

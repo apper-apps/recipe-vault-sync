@@ -1,5 +1,4 @@
-import React from "react";
-import Error from "@/components/ui/Error";
+import recipesData from '@/services/mockData/recipes.json';
 import recipesData from "@/services/mockData/recipes.json";
 
 const STORAGE_KEY = "recipeVault_recipes";
@@ -69,39 +68,58 @@ class RecipeService {
     return true;
   }
 
-async extractFromUrl(url) {
+async extractFromUrl(url, retryCount = 0) {
     await this.delay();
     
     try {
-      // Fetch the webpage content
-      const response = await fetch(url, {
+      // Use CORS proxy to fetch external URLs
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      
+      const response = await fetch(proxyUrl, {
         method: 'GET',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-          'Accept-Encoding': 'gzip, deflate',
-          'Connection': 'keep-alive',
+          'Accept': 'application/json',
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.status === 429 && retryCount < 2) {
+          // Rate limited, retry with exponential backoff
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
+          return this.extractFromUrl(url, retryCount + 1);
+        }
+        throw new Error(`Network error: ${response.status} ${response.statusText}`);
       }
 
-      const html = await response.text();
+      const data = await response.json();
+      
+      if (!data.contents) {
+        throw new Error('No content received from URL');
+      }
+
+      const html = data.contents;
       
       // Parse the HTML content
       const extractedRecipe = this.parseRecipeFromHtml(html, url);
       
       if (!extractedRecipe || !extractedRecipe.title) {
-        throw new Error('Could not extract recipe from this URL');
+        throw new Error('Could not extract recipe data from this URL. The page may not contain structured recipe information.');
       }
 
       return extractedRecipe;
     } catch (error) {
       console.error('Recipe extraction error:', error);
-      throw new Error(`Failed to extract recipe: ${error.message}`);
+      
+      // Categorize error types for better user feedback
+      if (error.message.includes('Network error') || error.message.includes('Failed to fetch')) {
+        throw new Error('Unable to access the recipe URL. Please check your internet connection and try again.');
+      } else if (error.message.includes('No content received')) {
+        throw new Error('The URL appears to be invalid or inaccessible. Please verify the link and try again.');
+      } else if (error.message.includes('Could not extract recipe data')) {
+        throw new Error('This URL doesn\'t appear to contain a structured recipe. Try copying the recipe details manually or use a different URL.');
+      } else {
+        throw new Error(`Recipe extraction failed: ${error.message}`);
+      }
     }
   }
 

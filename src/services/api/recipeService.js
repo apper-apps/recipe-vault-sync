@@ -372,25 +372,135 @@ async extractFromUrl(url, retryCount = 0) {
     };
   }
 
-  extractFacebookRecipe(html, url) {
+extractFacebookRecipe(html, url) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
     
-    const title = this.extractTextContent(doc, ['title', 'h1', '[data-testid="post_message"]']) || 'Facebook Recipe';
-    const description = this.extractTextContent(doc, ['meta[property="og:description"]', '[data-testid="post_message"]'], 'content') || '';
-    
+    // Multiple extraction strategies for Facebook content
+    const extractionAttempts = [];
+    let bestResult = null;
+    let bestScore = 0;
+
+    // Strategy 1: Post message content
+    try {
+      const postMessage = this.extractTextContent(doc, [
+        '[data-testid="post_message"]',
+        '[data-testid="story-subtitle"]',
+        '.userContent',
+        '[data-ad-preview="message"]'
+      ]);
+      
+      if (postMessage && postMessage.length > 50) {
+        const result = this.createRecipeFromText(postMessage, url, 'Facebook Post Message');
+        const score = this.scoreExtractionResult(result);
+        extractionAttempts.push({ strategy: 'Post Message', result, score, content: postMessage });
+        
+        if (score > bestScore) {
+          bestResult = result;
+          bestScore = score;
+        }
+      }
+    } catch (error) {
+      extractionAttempts.push({ strategy: 'Post Message', error: error.message });
+    }
+
+    // Strategy 2: Video/Reel description
+    try {
+      const videoDesc = this.extractTextContent(doc, [
+        '[data-testid="video-desc"]',
+        '.videoDescription',
+        '[aria-label*="description"]',
+        '[data-testid="reel-description"]'
+      ]);
+      
+      if (videoDesc && videoDesc.length > 30) {
+        const result = this.createRecipeFromText(videoDesc, url, 'Facebook Video Description');
+        const score = this.scoreExtractionResult(result);
+        extractionAttempts.push({ strategy: 'Video Description', result, score, content: videoDesc });
+        
+        if (score > bestScore) {
+          bestResult = result;
+          bestScore = score;
+        }
+      }
+    } catch (error) {
+      extractionAttempts.push({ strategy: 'Video Description', error: error.message });
+    }
+
+    // Strategy 3: Meta tags and page content
+    try {
+      const title = this.extractTextContent(doc, ['title', 'meta[property="og:title"]'], 'content') || 'Facebook Recipe';
+      const description = this.extractTextContent(doc, [
+        'meta[property="og:description"]',
+        'meta[name="description"]'
+      ], 'content') || '';
+      
+      if (description && description.length > 20) {
+        const result = this.createRecipeFromText(description, url, 'Facebook Meta Tags', title);
+        const score = this.scoreExtractionResult(result);
+        extractionAttempts.push({ strategy: 'Meta Tags', result, score, content: description });
+        
+        if (score > bestScore) {
+          bestResult = result;
+          bestScore = score;
+        }
+      }
+    } catch (error) {
+      extractionAttempts.push({ strategy: 'Meta Tags', error: error.message });
+    }
+
+    // Strategy 4: Comments or additional text content
+    try {
+      const additionalText = this.extractTextContent(doc, [
+        '.comment',
+        '[data-testid="UFI2Comment/body"]',
+        '.text_exposed_show',
+        '[data-testid="story-body"]'
+      ]);
+      
+      if (additionalText && additionalText.length > 100) {
+        const result = this.createRecipeFromText(additionalText, url, 'Facebook Comments/Additional');
+        const score = this.scoreExtractionResult(result);
+        extractionAttempts.push({ strategy: 'Comments/Additional', result, score, content: additionalText });
+        
+        if (score > bestScore) {
+          bestResult = result;
+          bestScore = score;
+        }
+      }
+    } catch (error) {
+      extractionAttempts.push({ strategy: 'Comments/Additional', error: error.message });
+    }
+
+    // Log extraction attempts for debugging
+    console.log('Facebook extraction attempts:', extractionAttempts.map(attempt => ({
+      strategy: attempt.strategy,
+      success: !!attempt.result,
+      score: attempt.score || 0,
+      error: attempt.error,
+      contentLength: attempt.content?.length || 0
+    })));
+
+    // Return best result or fallback
+    if (bestResult && bestScore > 20) {
+      bestResult.notes = `Recipe extracted from Facebook using ${extractionAttempts.find(a => a.score === bestScore)?.strategy} strategy. Extraction confidence: ${bestScore}%`;
+      return bestResult;
+    }
+
+    // Fallback result with diagnostic information
+    const fallbackTitle = this.extractTextContent(doc, ['title', 'h1']) || 'Facebook Content';
     return {
-      title: title,
+      title: fallbackTitle.includes('Facebook') ? 'Facebook Recipe' : fallbackTitle,
       source: 'Facebook',
       sourceUrl: url,
       imageUrl: this.extractTextContent(doc, ['meta[property="og:image"]'], 'content') || this.getDefaultImage(),
       prepTime: 15,
       cookTime: 30,
       servings: 4,
-      ingredients: this.parseIngredientsFromText(description),
-      instructions: this.parseInstructionsFromText(description),
-      tags: ['facebook', 'social-media'],
-      notes: `Recipe extracted from Facebook post: ${description.substring(0, 200)}...`
+      ingredients: [],
+      instructions: [],
+      tags: ['facebook', 'social-media', 'needs-review'],
+      notes: `Facebook extraction attempted with ${extractionAttempts.length} strategies. Best score: ${bestScore}%. Manual review recommended. ${extractionAttempts.filter(a => a.error).length > 0 ? 'Some extraction errors occurred.' : 'Content may not contain structured recipe information.'}`
     };
   }
 
@@ -493,6 +603,120 @@ async extractFromUrl(url, retryCount = 0) {
     }).filter(ing => ing.name);
   }
 
+// Helper method to create recipe from text content
+  createRecipeFromText(text, url, source, title = null) {
+    const recipeTitle = title || this.extractTitleFromText(text) || `${source} Recipe`;
+    
+    return {
+      title: recipeTitle,
+      source: source,
+      sourceUrl: url,
+      imageUrl: this.getDefaultImage(),
+      prepTime: 15,
+      cookTime: 30,
+      servings: 4,
+      ingredients: this.parseIngredientsFromText(text),
+      instructions: this.parseInstructionsFromText(text),
+      tags: this.extractTagsFromText(text),
+      notes: `Recipe extracted from ${source}: ${text.substring(0, 150)}${text.length > 150 ? '...' : ''}`
+    };
+  }
+
+  // Helper method to score extraction results
+  scoreExtractionResult(result) {
+    let score = 0;
+    
+    // Title quality (0-20 points)
+    if (result.title && result.title.length > 5 && !result.title.includes('Facebook')) {
+      score += 20;
+    } else if (result.title && result.title.length > 0) {
+      score += 10;
+    }
+    
+    // Ingredients (0-30 points)
+    if (result.ingredients && result.ingredients.length > 5) {
+      score += 30;
+    } else if (result.ingredients && result.ingredients.length > 2) {
+      score += 20;
+    } else if (result.ingredients && result.ingredients.length > 0) {
+      score += 10;
+    }
+    
+    // Instructions (0-30 points)
+    if (result.instructions && result.instructions.length > 3) {
+      score += 30;
+    } else if (result.instructions && result.instructions.length > 1) {
+      score += 20;
+    } else if (result.instructions && result.instructions.length > 0) {
+      score += 10;
+    }
+    
+    // Content quality (0-20 points)
+    const hasRecipeKeywords = result.notes && (
+      result.notes.toLowerCase().includes('ingredient') ||
+      result.notes.toLowerCase().includes('recipe') ||
+      result.notes.toLowerCase().includes('cook') ||
+      result.notes.toLowerCase().includes('bake') ||
+      result.notes.toLowerCase().includes('mix') ||
+      result.notes.toLowerCase().includes('cup') ||
+      result.notes.toLowerCase().includes('tbsp') ||
+      result.notes.toLowerCase().includes('tsp')
+    );
+    
+    if (hasRecipeKeywords) {
+      score += 20;
+    }
+    
+    return Math.min(score, 100);
+  }
+
+  // Helper method to extract title from text
+  extractTitleFromText(text) {
+    // Look for recipe title patterns
+    const titlePatterns = [
+      /(?:recipe for |making |how to make )([^.\n!?]{10,50})/i,
+      /^([^.\n!?]{5,50})(?:\s*recipe|\s*instructions?)/i,
+      /^([A-Z][^.\n!?]{5,50})\s*$/m
+    ];
+
+    for (const pattern of titlePatterns) {
+      const match = text.match(pattern);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+
+    // Fallback: first meaningful line
+    const lines = text.split('\n').filter(line => line.trim().length > 5);
+    if (lines.length > 0) {
+      return lines[0].substring(0, 50).trim();
+    }
+
+    return null;
+  }
+
+  // Helper method to extract tags from text
+  extractTagsFromText(text) {
+    const tags = ['facebook', 'social-media'];
+    const lowerText = text.toLowerCase();
+    
+    // Common food/recipe tags
+    const foodTags = [
+      'dessert', 'cake', 'cookies', 'pie', 'bread', 'pasta', 'pizza', 'soup', 'salad',
+      'chicken', 'beef', 'pork', 'fish', 'vegetarian', 'vegan', 'gluten-free',
+      'breakfast', 'lunch', 'dinner', 'snack', 'appetizer', 'main course',
+      'italian', 'mexican', 'asian', 'indian', 'chinese', 'french', 'american',
+      'quick', 'easy', 'healthy', 'comfort food', 'holiday', 'party'
+    ];
+    
+    foodTags.forEach(tag => {
+      if (lowerText.includes(tag)) {
+        tags.push(tag);
+      }
+    });
+    
+    return [...new Set(tags)];
+  }
   parseInstructions(instructionsList) {
     if (!instructionsList || !Array.isArray(instructionsList)) return [];
     
@@ -857,13 +1081,20 @@ parseIngredientText(text) {
     return Math.min(confidence, 95); // Cap at 95% to indicate uncertainty
   }
 
-  identifyChallenges(inputType, medium, input) {
+identifyChallenges(inputType, medium, input) {
     const challenges = [];
 
     if (inputType === 'url') {
       if (['instagram', 'tiktok', 'facebook'].includes(medium)) {
         challenges.push('Social media content may be behind login walls');
         challenges.push('Dynamic content loading may affect extraction');
+        
+        if (medium === 'facebook') {
+          challenges.push('Facebook Reels/videos often have minimal text content');
+          challenges.push('Recipe details may be in video narration rather than text');
+          challenges.push('Post descriptions might be brief or use shorthand');
+          challenges.push('Content structure varies between posts, videos, and pages');
+        }
       }
       if (medium === 'youtube') {
         challenges.push('Video content requires transcript extraction');
@@ -871,6 +1102,12 @@ parseIngredientText(text) {
       }
       challenges.push('Website structure changes may break extraction');
       challenges.push('CORS policies may prevent direct access');
+      
+      // URL-specific challenges
+      if (typeof input === 'string' && input.includes('facebook.com/reel/')) {
+        challenges.push('Facebook Reels primarily contain video content with minimal text');
+        challenges.push('Recipe instructions likely embedded in video, not accessible via text extraction');
+      }
     }
 
     if (inputType === 'image') {
@@ -894,7 +1131,7 @@ parseIngredientText(text) {
     return challenges;
   }
 
-  suggestFallbackStrategies(inputType, medium) {
+suggestFallbackStrategies(inputType, medium) {
     const strategies = [];
 
     if (inputType === 'url') {
@@ -905,6 +1142,14 @@ parseIngredientText(text) {
       if (['instagram', 'tiktok', 'facebook'].includes(medium)) {
         strategies.push('Screenshot the post and use image extraction');
         strategies.push('Copy caption text for manual parsing');
+        
+        if (medium === 'facebook') {
+          strategies.push('For Facebook Reels: Watch video and manually transcribe recipe');
+          strategies.push('Check video comments for recipe details shared by creator');
+          strategies.push('Look for recipe link in post description or first comment');
+          strategies.push('Try accessing the creator\'s page for full recipe posts');
+          strategies.push('Use browser developer tools to inspect hidden content');
+        }
       }
     }
 
@@ -923,6 +1168,7 @@ parseIngredientText(text) {
       strategies.push('Use video platform auto-generated captions');
       strategies.push('Extract recipe from video description if available');
       strategies.push('Take screenshots of recipe steps shown in video');
+      strategies.push('For social media videos: Check creator\'s bio for recipe links');
     }
 
     return strategies;
